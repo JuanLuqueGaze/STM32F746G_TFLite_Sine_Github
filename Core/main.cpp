@@ -21,6 +21,7 @@
 #include "cmsis_os.h"
 #include "fatfs.h"
 #include "usb_ host.h"
+#include "stm32746g_discovery.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -69,6 +70,8 @@ ETH_TxPacketConfig TxConfig;
 
 /* Private function prototypes -----------------------------------------------*/
 static void system_clock_config(void);
+static void cpu_cache_enable(void);
+ static void error_handler(void);
 static void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
@@ -102,6 +105,10 @@ int main(void)
 
   /* Configure the system clock */
   system_clock_config();
+
+      // Configure on-board green LED
+      BSP_LED_Init(LED_GREEN);
+ 
 
   /* Configure the peripherals common clocks */
   PeriphCommonClock_Config();  //Maybe this should be commented out
@@ -206,21 +213,25 @@ static void MX_USART1_UART_Init(void)
 
 }
 
+static void error_handler(void)
+ {
+     // Turn Green LED ON
+     BSP_LED_On(LED_GREEN);
+     while(1);
+ }
+
 
 
 /**
   * @brief  This function is executed in case of error occurrence.
   * @retval None
   */
-void Error_Handler(void)
+ static void cpu_cache_enable(void)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1)
-  {
-  }
-  /* USER CODE END Error_Handler_Debug */
+    // Enable I-Cache
+    SCB_EnableICache();
+    // Enable D-Cache
+    SCB_EnableDCache();
 }
 
 #ifdef  USE_FULL_ASSERT
