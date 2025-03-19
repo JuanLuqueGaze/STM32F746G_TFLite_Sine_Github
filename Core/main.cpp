@@ -64,7 +64,7 @@ namespace
  uint8_t tensor_arena[kTensorArenaSize];
  }// namespace
  
-
+ const uint16_t INFERENCE_PER_CYCLE = 70;
 
 // UART handler declaration
 UART_HandleTypeDef DebugUartHandler;
@@ -180,6 +180,7 @@ int main(void)
  input = interpreter->input(0);
  output = interpreter->output(0);
 
+ float unitValuePerDevision = INPUT_RANGE / static_cast<float>(INFERENCE_PER_CYCLE);
 
   while (1)
   {
