@@ -119,7 +119,10 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+  BSP_LED_Init(LED_GREEN);
 
+  // Turn on the LED to indicate system clock configuration success
+  BSP_LED_On(LED_GREEN);
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
