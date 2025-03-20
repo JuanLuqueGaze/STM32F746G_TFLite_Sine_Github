@@ -19,8 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "cmsis_os.h"
-#include "fatfs.h"
-#include "usb_ host.h"
 #include "stm32746g_discovery.h"
 #include "sine_model.h"
 #include "lcd.h"
