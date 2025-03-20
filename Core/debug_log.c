@@ -8,10 +8,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "tensorflow/lite/micro/debug_log.h"
-#include <cstdio>
 
+#include <stdio.h>
 
-_BEGIN_STD_C
 
 #include "stm32f7xx_hal.h"
 #include "stm32f7xx_hal_uart.h"
@@ -31,5 +30,3 @@ void DebugLog(const char *s)
 {
 	fprintf(stderr, "%s", s);
 }
-
-_END_STD_C
