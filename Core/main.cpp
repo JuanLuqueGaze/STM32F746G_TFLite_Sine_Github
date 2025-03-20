@@ -17,7 +17,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-
+#include "main.h"
 #include "cmsis_os.h"
 #include "stm32746g_discovery.h"
 #include "sine_model.h"
