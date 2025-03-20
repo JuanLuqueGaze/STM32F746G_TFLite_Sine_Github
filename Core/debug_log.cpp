@@ -26,7 +26,7 @@ int __io_putchar(int ch)
 }
 
 
-
+// Used by TFLite error_reporter
 void DebugLog(const char *s)
 {
 	fprintf(stderr, "%s", s);
