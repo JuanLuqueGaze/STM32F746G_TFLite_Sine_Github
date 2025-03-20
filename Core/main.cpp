@@ -317,9 +317,10 @@ static void uart1_init(void)
 
 static void error_handler(void)
  {
-     // Turn Green LED ON
-     BSP_LED_On(LED_GREEN);
-     while(1);
+  const char* error_msg = "Error occurred. Entering error handler.\n";
+  HAL_UART_Transmit(&DebugUartHandler, (uint8_t*)error_msg, strlen(error_msg), HAL_MAX_DELAY);
+  BSP_LED_On(LED_GREEN);
+  while (1);
  }
 
 
