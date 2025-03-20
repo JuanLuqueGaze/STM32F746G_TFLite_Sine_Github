@@ -23,6 +23,7 @@
 #include "usb_ host.h"
 #include "stm32746g_discovery.h"
 #include "sine_model.h"
+#include "lcd.h"
 #include "tensorflow/lite/micro/kernels/all_ops_resolver.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
@@ -144,6 +145,8 @@ int main(void)
 
  // Initialize UART1
  uart1_init();
+ // Initialize LCD
+ LCD_Init();
 
  static tflite::MicroErrorReporter micro_error_reporter;
  error_reporter = &micro_error_reporter;
@@ -202,6 +205,8 @@ int main(void)
   
             // Read the predicted y value from the model's output tensor
             float y_val = output->data.f[0];
+            // Plot the results in the LCD screen
+            LCD_Output(error_reporter, x_val, y_val);
           }
 
   }
@@ -231,14 +236,14 @@ int main(void)
  
    if(HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
-    Error_Handler();
+    error_handler();
   }
 
   /** Activate the Over-Drive mode
   */
   if(HAL_PWREx_EnableOverDrive() != HAL_OK)
   {
-    Error_Handler();
+    error_handler();
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
@@ -253,7 +258,7 @@ int main(void)
 
   if(HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_6) != HAL_OK)
   {
-    Error_Handler();
+    error_handler();
   }
 }
 
