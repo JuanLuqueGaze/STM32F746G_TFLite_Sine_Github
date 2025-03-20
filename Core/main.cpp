@@ -65,6 +65,9 @@ namespace
  uint8_t tensor_arena[kTensorArenaSize];
  }// namespace
  
+
+ extern const float INPUT_RANGE = 2.f * 3.14159265359f;
+
  const uint16_t INFERENCE_PER_CYCLE = 70;
 
 // UART handler declaration
