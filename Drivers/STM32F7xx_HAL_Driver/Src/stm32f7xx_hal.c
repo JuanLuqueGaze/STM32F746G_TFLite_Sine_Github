@@ -34,6 +34,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f7xx_hal.h"
+#include "stm32746g_discovery.h"
 
 /** @addtogroup STM32F7xx_HAL_Driver
   * @{
@@ -137,6 +138,7 @@ HAL_TickFreqTypeDef uwTickFreq = HAL_TICK_FREQ_DEFAULT;  /* 1KHz */
   */
 HAL_StatusTypeDef HAL_Init(void)
 {
+ 
   /* Configure Instruction cache through ART accelerator */ 
 #if (ART_ACCELERATOR_ENABLE != 0)
   __HAL_FLASH_ART_ENABLE();
@@ -150,9 +152,10 @@ HAL_StatusTypeDef HAL_Init(void)
   /* Set Interrupt Group Priority */
   HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
 
+  BSP_LED_On(LED_GREEN);
   /* Use systick as time base source and configure 1ms tick (default clock after Reset is HSI) */
   HAL_InitTick(TICK_INT_PRIORITY);
-
+//BSP_LED_On(LED_GREEN);
   /* Init the low level hardware */
   HAL_MspInit();
 
