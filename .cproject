@@ -138,7 +138,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<!-- This folders has been included by myself, so i have to call it manually -->
+						<!-- This folders have been included by myself, so i have to call them manually -->
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Utilities"/>
  						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="tensorflow"/>
  						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="third_party"/>
@@ -268,7 +268,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<!-- This folders has been included by myself, so i have to call it manually -->
+						<!-- This folders have been included by myself, so i have to call them manually -->
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Utilities"/>
  						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="tensorflow"/>
  						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="third_party"/>
