@@ -122,25 +122,24 @@ int main(void)
   BSP_LED_Init(LED_GREEN);
 
   // Turn on the LED to indicate system clock configuration success
-  BSP_LED_On(LED_GREEN);
+  //BSP_LED_On(LED_GREEN);
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
   cpu_cache_enable();
+
+
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
+  BSP_LED_On(LED_GREEN);
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
 
   /* Configure the system clock */
   system_clock_config();
-
-      // Configure on-board green LED
-      BSP_LED_Init(LED_GREEN);
  
-
   /* Configure the peripherals common clocks */
   //PeriphCommonClock_Config();  //Maybe this should be commented out
 
@@ -152,6 +151,7 @@ int main(void)
  uart1_init();
  // Initialize LCD
  LCD_Init();
+
 
  static tflite::MicroErrorReporter micro_error_reporter;
  error_reporter = &micro_error_reporter;
@@ -213,6 +213,7 @@ int main(void)
             // Plot the results in the LCD screen
             handle_output(error_reporter, x_val, y_val);
           }
+
 
   }
 }
