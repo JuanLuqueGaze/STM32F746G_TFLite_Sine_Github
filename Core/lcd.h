@@ -1,10 +1,3 @@
-/**
-  ******************************************************************************
-  * @file    lcd.h
-  * @author  Fahad Mirza (fahadmirza8@gmail.com)
-  * @brief   Header file for LCD functionalities
-  ******************************************************************************
-  */
 
 #ifndef LCD_H_
 #define LCD_H_
