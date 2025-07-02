@@ -57,7 +57,7 @@ class ContextHelper {
 };
 
 }  // namespace internal
-
+// What does this class???
 class MicroInterpreter {
  public:
   // The lifetime of the model, op resolver, tensor arena, and error reporter
@@ -68,6 +68,8 @@ class MicroInterpreter {
   // function.
   // The interpreter doesn't do any deallocation of any of the pointed-to
   // objects, ownership remains with the caller.
+
+  // This is a constructor, a function that is named the same way as the class. 
   MicroInterpreter(const Model* model, const OpResolver& op_resolver,
                    uint8_t* tensor_arena, size_t tensor_arena_size,
                    ErrorReporter* error_reporter);

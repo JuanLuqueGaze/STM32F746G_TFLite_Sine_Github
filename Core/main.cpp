@@ -27,7 +27,7 @@
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
-
+#include "uart_utils.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -60,7 +60,7 @@ namespace
  // Create an area of memory to use for input, output, and intermediate arrays.
  // Finding the minimum value for your model may require some trial and error.
  constexpr uint32_t kTensorArenaSize = 2 * 1024;
- uint8_t tensor_arena[kTensorArenaSize];
+ alignas(16) static uint8_t tensor_arena[kTensorArenaSize];
  }// namespace
  
 
@@ -128,7 +128,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
   cpu_cache_enable();
 
-
+  
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
@@ -156,11 +156,19 @@ int main(void)
  static tflite::MicroErrorReporter micro_error_reporter;
  error_reporter = &micro_error_reporter;
 
+
  // Map the model into a usable data structure. This doesn't involve any
  // copying or parsing, it's a very lightweight operation.
  model = tflite::GetModel(sine_model);
-
- if(model->version() != TFLITE_SCHEMA_VERSION)
+// Print the address of model in hex
+  char buffer[128];
+  sprintf(buffer, "Allocation address: 0x%08lX\r\n", (unsigned long)(uintptr_t)model);
+  PrintToUart(buffer);
+  sprintf(buffer, "Allocation address: 0x%08lX\r\n", (unsigned long)(uintptr_t)sine_model);
+  PrintToUart(buffer);
+  sprintf(buffer, "Allocation address: 0x%08lX\r\n", (unsigned long)(uintptr_t)tensor_arena);
+  PrintToUart(buffer);
+if(model->version() != TFLITE_SCHEMA_VERSION)
  {
    TF_LITE_REPORT_ERROR(error_reporter,
                           "Model provided is schema version %d not equal "
