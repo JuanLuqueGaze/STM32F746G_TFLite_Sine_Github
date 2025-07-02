@@ -1,0 +1,10 @@
+sizeof_SimpleMemoryAllocator = 20;
+alignof_SimpleMemoryAllocator = 4;
+soffset_t_size = 2; % bytes
+VT_VERSION = 4;
+VT_OPERATOR_CODES = 6;
+VT_SUBGRAPHS = 8;
+VT_DESCRIPTION = 10;
+VT_BUFFERS = 12;
+VT_METADATA_BUFFER = 14;
+VT_METADATA = 16;

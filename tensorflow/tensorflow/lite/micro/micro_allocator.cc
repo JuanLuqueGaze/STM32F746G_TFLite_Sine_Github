@@ -27,6 +27,7 @@ limitations under the License.
 #include "tensorflow/lite/micro/memory_helpers.h"
 #include "tensorflow/lite/micro/memory_planner/greedy_memory_planner.h"
 #include "tensorflow/lite/micro/simple_memory_allocator.h"
+#include "uart_utils.h"
 
 namespace tflite {
 
@@ -381,19 +382,36 @@ TfLiteStatus InitializeRuntimeTensor(
 }  // namespace internal
 
 TfLiteStatus MicroAllocator::Init() {
+  PrintToUart("I AM GETTING THE SUBGRAPH!!!!!\r\n");
   auto* subgraphs = model_->subgraphs();
   if (subgraphs->size() != 1) {
     TF_LITE_REPORT_ERROR(error_reporter_,
                          "Only 1 subgraph is currently supported.\n");
     return kTfLiteError;
   }
+
   subgraph_ = (*subgraphs)[0];
 
   context_->tensors_size = subgraph_->tensors()->size();
+  char debug_buffer[128];
+  sprintf(debug_buffer, "Subgraph info:\r\n");
+  PrintToUart(debug_buffer);
+  sprintf(debug_buffer, "Subgraph table address: %p\r\n", (void*)subgraph_);
+  PrintToUart(debug_buffer);
+  sprintf(debug_buffer, "Subgraph size: %d \r\n", subgraphs->size());
+  PrintToUart(debug_buffer);
+  const auto* tensors_ptr = subgraph_->tensors();
+  sprintf(debug_buffer, "Pointer to tensors vector: %p\r\n", (void*)tensors_ptr);
+  PrintToUart(debug_buffer);
+  
+  sprintf(debug_buffer, "It has to allocate %ld tensors, of %d bytes with %d alignment\r\n", subgraph_->tensors()->size(),sizeof(TfLiteTensor) * context_->tensors_size,alignof(TfLiteTensor));
+  PrintToUart(debug_buffer);
   context_->tensors =
       reinterpret_cast<TfLiteTensor*>(memory_allocator_->AllocateFromTail(
           sizeof(TfLiteTensor) * context_->tensors_size,
           alignof(TfLiteTensor)));
+
+  PrintToUart("Finished the allocation of the tensors\r\n");
   if (context_->tensors == nullptr) {
     TF_LITE_REPORT_ERROR(
         error_reporter_,
@@ -404,6 +422,8 @@ TfLiteStatus MicroAllocator::Init() {
 
   // Initialize runtime tensors in context_ using the flatbuffer.
   for (size_t i = 0; i < subgraph_->tensors()->size(); ++i) {
+    sprintf(debug_buffer,"Bucle de inicialización, tensor %d\r\n",i);
+    PrintToUart(debug_buffer);
     TfLiteStatus status = internal::InitializeRuntimeTensor(
         memory_allocator_, *subgraph_->tensors()->Get(i), model_->buffers(),
         error_reporter_, &context_->tensors[i]);

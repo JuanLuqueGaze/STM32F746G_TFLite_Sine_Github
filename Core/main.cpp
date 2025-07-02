@@ -59,7 +59,7 @@ namespace
  
  // Create an area of memory to use for input, output, and intermediate arrays.
  // Finding the minimum value for your model may require some trial and error.
- constexpr uint32_t kTensorArenaSize = 2 * 1024;
+ constexpr uint32_t kTensorArenaSize = 4 * 1024;
  alignas(16) static uint8_t tensor_arena[kTensorArenaSize];
  }// namespace
  
@@ -162,11 +162,11 @@ int main(void)
  model = tflite::GetModel(sine_model);
 // Print the address of model in hex
   char buffer[128];
-  sprintf(buffer, "Allocation address: 0x%08lX\r\n", (unsigned long)(uintptr_t)model);
+  sprintf(buffer, "Model address: 0x%08lX\r\n", (unsigned long)(uintptr_t)model);
   PrintToUart(buffer);
-  sprintf(buffer, "Allocation address: 0x%08lX\r\n", (unsigned long)(uintptr_t)sine_model);
+  sprintf(buffer, "Sine Model address: 0x%08lX\r\n", (unsigned long)(uintptr_t)sine_model);
   PrintToUart(buffer);
-  sprintf(buffer, "Allocation address: 0x%08lX\r\n", (unsigned long)(uintptr_t)tensor_arena);
+  sprintf(buffer, "Tensor Arena address: 0x%08lX\r\n", (unsigned long)(uintptr_t)tensor_arena);
   PrintToUart(buffer);
 
   char byte_buffer[128];
