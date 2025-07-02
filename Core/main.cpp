@@ -168,6 +168,22 @@ int main(void)
   PrintToUart(buffer);
   sprintf(buffer, "Allocation address: 0x%08lX\r\n", (unsigned long)(uintptr_t)tensor_arena);
   PrintToUart(buffer);
+
+  char byte_buffer[128];
+sprintf(byte_buffer, "First 30 bytes of tensor_arena:\r\n");
+PrintToUart(byte_buffer);
+
+for (int i = 0; i < 30; ++i) {
+    sprintf(byte_buffer, "0x%02X ", tensor_arena[i]);
+    PrintToUart(byte_buffer);
+    // Optional: print a newline every 16 bytes for readability
+    if ((i + 1) % 16 == 0) {
+        PrintToUart("\r\n");
+    }
+}
+PrintToUart("\r\n");
+
+
 if(model->version() != TFLITE_SCHEMA_VERSION)
  {
    TF_LITE_REPORT_ERROR(error_reporter,
