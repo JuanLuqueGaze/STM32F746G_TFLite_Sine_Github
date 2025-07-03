@@ -2416,6 +2416,12 @@ class Struct FLATBUFFERS_FINAL_CLASS {
 class Table {
  public:
   const uint8_t *GetVTable() const {
+    /*
+    char buffer[64];
+    sprintf(buffer, "data_ is : 0x%08lX\r\n", (unsigned long)(uintptr_t)data_);
+    PrintToUart(buffer);
+    sprintf(buffer, "Substract to data_ is : %ld\r\n", (long)ReadScalar<soffset_t>(data_));
+    PrintToUart(buffer);*/
     return data_ - ReadScalar<soffset_t>(data_);
   }
 
@@ -2438,6 +2444,7 @@ class Table {
 
   template<typename T> T GetField(voffset_t field, T defaultval) const {
     auto field_offset = GetOptionalFieldOffset(field);
+
     return field_offset ? ReadScalar<T>(data_ + field_offset) : defaultval;
   }
 

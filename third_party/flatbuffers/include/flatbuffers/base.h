@@ -54,7 +54,7 @@
 #endif
 
 #include "flatbuffers/stl_emulation.h"
-
+#include "uart_utils.h"
 #if defined(__ICCARM__)
 #include <intrinsics.h>
 #endif
@@ -371,6 +371,10 @@ template<typename T>
 // UBSAN: C++ aliasing type rules, see std::bit_cast<> for details.
 __supress_ubsan__("alignment")
 T ReadScalar(const void *p) {
+  /*
+  char buffer[64];
+  sprintf(buffer, "ReadScalar in direction: 0x%08lX\r\n", (unsigned long)(uintptr_t)p);
+  PrintToUart(buffer);*/
   return EndianScalar(*reinterpret_cast<const T *>(p));
 }
 

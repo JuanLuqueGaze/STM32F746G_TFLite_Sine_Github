@@ -383,6 +383,8 @@ TfLiteStatus InitializeRuntimeTensor(
 
 TfLiteStatus MicroAllocator::Init() {
 char debug_buffer[128];
+
+/*
 sprintf(debug_buffer, "Version: %d\r\n", model_->version());
 PrintToUart(debug_buffer);
 
@@ -403,7 +405,23 @@ PrintToUart(debug_buffer);
 
 sprintf(debug_buffer, "Pointer to metadata: %p\r\n", (void*)model_->metadata());
 PrintToUart(debug_buffer);
+*/
+PrintToUart("OPERATOR CODES DATA");
+const auto* operator_codes = model_->operator_codes();
+sprintf(debug_buffer, "Operator codes count: %d\r\n", operator_codes ? operator_codes->size() : 0);
+PrintToUart(debug_buffer);
 
+for (uint32_t i = 0; i < operator_codes->size(); ++i) {
+  const auto* op_code = operator_codes->Get(i);
+  sprintf(debug_buffer, "OperatorCode %lu:\r\n", (unsigned long)i);
+  PrintToUart(debug_buffer);
+  sprintf(debug_buffer, "  builtin_code: %d\r\n", op_code->builtin_code());
+  PrintToUart(debug_buffer);
+  sprintf(debug_buffer, "  version: %d\r\n", op_code->version());
+  PrintToUart(debug_buffer);
+  sprintf(debug_buffer, "  custom_code ptr: %p\r\n", (void*)op_code->custom_code());
+  PrintToUart(debug_buffer);
+}
 
 
   PrintToUart("I AM GETTING THE SUBGRAPH!!!!!\r\n");

@@ -16,4 +16,6 @@ function num = getnumber(varargin)
     exps  = uint64(0:numel(bytes)-1);
     % compute sum(bytes(i)*256^exps(i))
     num   = sum( bytes .* ( uint64(256) .^ exps ) );
+    
+
 end
