@@ -382,6 +382,30 @@ TfLiteStatus InitializeRuntimeTensor(
 }  // namespace internal
 
 TfLiteStatus MicroAllocator::Init() {
+char debug_buffer[128];
+sprintf(debug_buffer, "Version: %d\r\n", model_->version());
+PrintToUart(debug_buffer);
+
+sprintf(debug_buffer, "Pointer to operator_codes: %p\r\n", (void*)model_->operator_codes());
+PrintToUart(debug_buffer);
+
+sprintf(debug_buffer, "Pointer to subgraphs: %p\r\n", (void*)model_->subgraphs());
+PrintToUart(debug_buffer);
+
+sprintf(debug_buffer, "Pointer to description: %p\r\n", (void*)model_->description());
+PrintToUart(debug_buffer);
+
+sprintf(debug_buffer, "Pointer to buffers: %p\r\n", (void*)model_->buffers());
+PrintToUart(debug_buffer);
+
+sprintf(debug_buffer, "Pointer to metadata_buffer: %p\r\n", (void*)model_->metadata_buffer());
+PrintToUart(debug_buffer);
+
+sprintf(debug_buffer, "Pointer to metadata: %p\r\n", (void*)model_->metadata());
+PrintToUart(debug_buffer);
+
+
+
   PrintToUart("I AM GETTING THE SUBGRAPH!!!!!\r\n");
   auto* subgraphs = model_->subgraphs();
   if (subgraphs->size() != 1) {
@@ -393,7 +417,7 @@ TfLiteStatus MicroAllocator::Init() {
   subgraph_ = (*subgraphs)[0];
 
   context_->tensors_size = subgraph_->tensors()->size();
-  char debug_buffer[128];
+
   sprintf(debug_buffer, "Subgraph info:\r\n");
   PrintToUart(debug_buffer);
   sprintf(debug_buffer, "Subgraph table address: %p\r\n", (void*)subgraph_);
