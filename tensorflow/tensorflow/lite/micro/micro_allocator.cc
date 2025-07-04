@@ -442,8 +442,26 @@ for (uint32_t i = 0; i < operator_codes->size(); ++i) {
   PrintToUart(debug_buffer);
   sprintf(debug_buffer, "Subgraph size: %d \r\n", subgraphs->size());
   PrintToUart(debug_buffer);
+
   const auto* tensors_ptr = subgraph_->tensors();
+  const auto* inputs_ptr = subgraph_->inputs();
+  const auto* outputs_ptr = subgraph_->outputs();
+  const auto* operators_ptr = subgraph_->operators();
+  const auto* name_ptr = subgraph_->name();
+
   sprintf(debug_buffer, "Pointer to tensors vector: %p\r\n", (void*)tensors_ptr);
+  PrintToUart(debug_buffer);
+  
+  sprintf(debug_buffer, "Pointer to inputs vector: %p\r\n", (void*)inputs_ptr);
+  PrintToUart(debug_buffer);
+  
+  sprintf(debug_buffer, "Pointer to outputs vector: %p\r\n", (void*)outputs_ptr);
+  PrintToUart(debug_buffer);
+  
+  sprintf(debug_buffer, "Pointer to operators vector: %p\r\n", (void*)operators_ptr);
+  PrintToUart(debug_buffer);
+  
+  sprintf(debug_buffer, "Pointer to name vector: %p\r\n", (void*)name_ptr);
   PrintToUart(debug_buffer);
   
   sprintf(debug_buffer, "It has to allocate %ld tensors, of %d bytes with %d alignment\r\n", subgraph_->tensors()->size(),sizeof(TfLiteTensor) * context_->tensors_size,alignof(TfLiteTensor));
