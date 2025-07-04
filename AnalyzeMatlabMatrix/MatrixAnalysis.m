@@ -80,7 +80,7 @@ fprintf('Tensor tail direction is 0x%s\n', dec2hex(tensor_tail));
 
         model.data_ = model_direction;
         model.vtable = model.data_ - getnumber(g_model(model.data_ - model_matrix_direction+1),g_model(model.data_ - model_matrix_direction+2));
-        model.version = GetField(VT_MODEL.VT_VERSION, model.data_, g_model, model_matrix_direction,2);
+        model.version = GetField(VT_MODEL.VT_VERSION, model.data_, g_model, model_matrix_direction,2,0);
         model.operator_codes = GetPointer(VT_MODEL.VT_OPERATOR_CODES, model_direction, g_model, model_matrix_direction);
         model.subgraphs = GetPointer(VT_MODEL.VT_SUBGRAPHS, model_direction, g_model, model_matrix_direction);
         model.description = GetPointer(VT_MODEL.VT_DESCRIPTION, model_direction, g_model, model_matrix_direction);
@@ -118,7 +118,9 @@ for i=1:operator_codes.size
     fprintf('Operator codes pointer 0x%s\n', dec2hex(operator_codes.operator(i).pointer));  
 end
 for i=1:operator_codes.size
-    operator_codes.operator(i).builtin_code=GetField(VT_OPERATORS.VT_BUILTIN_CODE, operator_codes.operator(i).pointer, g_model, model_matrix_direction,1);
-    operator_codes.operator(i).version=GetField(VT_OPERATORS.VT_VERSION, operator_codes.operator(i).pointer, g_model, model_matrix_direction,1);
+    operator_codes.operator(i).builtin_code=GetField(VT_OPERATORS.VT_BUILTIN_CODE, operator_codes.operator(i).pointer, g_model, model_matrix_direction,1,0);
+    operator_codes.operator(i).version=GetField(VT_OPERATORS.VT_VERSION, operator_codes.operator(i).pointer, g_model, model_matrix_direction,2,1);
+    operator_codes.operator(i).custom_code = GetPointer(VT_OPERATORS.VT_CUSTOM_CODE, operator_codes.operator(i).pointer, g_model, model_matrix_direction);
+
 end
        
