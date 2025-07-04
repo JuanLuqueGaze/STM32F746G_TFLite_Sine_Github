@@ -1,7 +1,7 @@
 function pointer = GetPointer(VT_OFFSET, data_, g_model, model_matrix_direction)
 
   
-        getnum=getnumber(g_model(data_ - model_matrix_direction+1),g_model(data_ - model_matrix_direction+2));
+    getnum=getnumber(g_model(data_ - model_matrix_direction+1),g_model(data_ - model_matrix_direction+2));
     getnum= double( typecast(uint16(getnum), 'int16') );
     vtable = data_ - getnum;
     %fprintf('Vtable direction is 0x%s\n', dec2hex(vtable));

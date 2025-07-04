@@ -2416,10 +2416,10 @@ class Struct FLATBUFFERS_FINAL_CLASS {
 class Table {
  public:
   const uint8_t *GetVTable() const {
-    /*
+    
     char buffer[64];
-    sprintf(buffer, "data_ is : 0x%08lX\r\n", (unsigned long)(uintptr_t)data_);
-    PrintToUart(buffer);
+    /*sprintf(buffer, "data_ is : 0x%08lX\r\n", (unsigned long)(uintptr_t)data_);
+    PrintToUart(buffer);/*
     sprintf(buffer, "Substract to data_ is : %ld\r\n", (long)ReadScalar<soffset_t>(data_));
     PrintToUart(buffer);*/
     return data_ - ReadScalar<soffset_t>(data_);
@@ -2431,12 +2431,13 @@ class Table {
     // The vtable offset is always at the start.
     auto vtable = GetVTable();
     char buffer[64];
+    /*
     sprintf(buffer, "vtable address: 0x%08lX\r\n", (unsigned long)(uintptr_t)vtable);
-    PrintToUart(buffer);
+    PrintToUart(buffer);*/
     // The first element is the size of the vtable (fields + type id + itself).
     auto vtsize = ReadScalar<voffset_t>(vtable);
-    sprintf(buffer, "vtable size: %d\r\n", vtsize);
-    PrintToUart(buffer);
+    /*sprintf(buffer, "vtable size: %d\r\n", vtsize);
+    PrintToUart(buffer);*/
     // If the field we're accessing is outside the vtable, we're reading older
     // data, so it's the same as if the offset was 0 (not present).
     return field < vtsize ? ReadScalar<voffset_t>(vtable + field) : 0;
@@ -2444,22 +2445,27 @@ class Table {
 
   template<typename T> T GetField(voffset_t field, T defaultval) const {
     auto field_offset = GetOptionalFieldOffset(field);
-
+    char buffer[64];
+    /*sprintf(buffer, "field_offset: %d\r\n", field_offset);
+    PrintToUart(buffer);
+    sprintf(buffer, "Reading on: 0x%08lX\r\n", (unsigned long)(uintptr_t)(data_ + field_offset));
+    PrintToUart(buffer);*/
     return field_offset ? ReadScalar<T>(data_ + field_offset) : defaultval;
   }
 
   template<typename P> P GetPointer(voffset_t field) {
     auto field_offset = GetOptionalFieldOffset(field);
     char buffer[64];
-    sprintf(buffer, "data_ address: 0x%08lX\r\n", (unsigned long)(uintptr_t)data_);
+    /*sprintf(buffer, "data_ address: 0x%08lX\r\n", (unsigned long)(uintptr_t)data_);
     PrintToUart(buffer);
     
     sprintf(buffer, "field_offset: %d\r\n", field_offset);
-    PrintToUart(buffer);
+    PrintToUart(buffer);*/
     auto p = data_ + field_offset;
     auto debugging_pointer = (p + ReadScalar<uoffset_t>(p));
+    /*
     sprintf(buffer, "Return of GetPointer: 0x%08lX\r\n", (unsigned long)(uintptr_t)debugging_pointer);
-    PrintToUart(buffer);
+    PrintToUart(buffer);*/
     return field_offset ? reinterpret_cast<P>(p + ReadScalar<uoffset_t>(p))
                         : nullptr;
   }

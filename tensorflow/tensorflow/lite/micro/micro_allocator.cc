@@ -442,7 +442,7 @@ for (uint32_t i = 0; i < operator_codes->size(); ++i) {
   PrintToUart(debug_buffer);
   sprintf(debug_buffer, "Subgraph size: %d \r\n", subgraphs->size());
   PrintToUart(debug_buffer);
-
+/*
   const auto* tensors_ptr = subgraph_->tensors();
   const auto* inputs_ptr = subgraph_->inputs();
   const auto* outputs_ptr = subgraph_->outputs();
@@ -465,7 +465,32 @@ for (uint32_t i = 0; i < operator_codes->size(); ++i) {
   PrintToUart(debug_buffer);
   
   sprintf(debug_buffer, "It has to allocate %ld tensors, of %d bytes with %d alignment\r\n", subgraph_->tensors()->size(),sizeof(TfLiteTensor) * context_->tensors_size,alignof(TfLiteTensor));
+  PrintToUart(debug_buffer);*/
+
+
+  PrintToUart("TENSORS INFO\r\n");
+
+  sprintf(debug_buffer, "Size: %d\r\n", subgraph_->tensors()->size());
   PrintToUart(debug_buffer);
+
+  for (size_t i = 0; i < subgraph_->tensors()->size(); i++) {
+    sprintf(debug_buffer, "Pointer to shape of tensor %d: %p\r\n",i+1, (void*)subgraph_->tensors()->Get(i)->shape());
+    PrintToUart(debug_buffer);
+    sprintf(debug_buffer, "Type of tensor %d: %d\r\n",i+1, (void*)subgraph_->tensors()->Get(i)->type());
+    PrintToUart(debug_buffer);
+    sprintf(debug_buffer, "Buffer of tensor %d: %d\r\n",i+1, (void*)subgraph_->tensors()->Get(i)->buffer());
+    PrintToUart(debug_buffer);
+    sprintf(debug_buffer, "Is variable of tensor %d: %d\r\n",i+1, (void*)subgraph_->tensors()->Get(i)->is_variable());
+    PrintToUart(debug_buffer);
+    sprintf(debug_buffer, "Pointer to name of tensor %d: %p\r\n",i+1, (void*)subgraph_->tensors()->Get(i)->name());
+    PrintToUart(debug_buffer);
+    sprintf(debug_buffer, "Pointer to quantization of tensor %d: %p\r\n",i+1, (void*)subgraph_->tensors()->Get(i)->quantization());
+    PrintToUart(debug_buffer);    
+    sprintf(debug_buffer, "Pointer to sparsity of tensor %d: %p\r\n",i+1, (void*)subgraph_->tensors()->Get(i)->sparsity());
+    PrintToUart(debug_buffer);    
+    sprintf(debug_buffer, "Pointer to shape signature of tensor %d: %p\r\n\n",i+1, (void*)subgraph_->tensors()->Get(i)->shape_signature());
+    PrintToUart(debug_buffer);
+}
   context_->tensors =
       reinterpret_cast<TfLiteTensor*>(memory_allocator_->AllocateFromTail(
           sizeof(TfLiteTensor) * context_->tensors_size,
