@@ -1,4 +1,4 @@
-function pointer = GetPointer(VT_OFFSET, data_, g_model, model_matrix_direction,limitation)
+function pointer = GetPointer(VT_OFFSET, data_, g_model, model_matrix_direction)
 
     getnum=getnumber(g_model(data_ - model_matrix_direction+1),g_model(data_ - model_matrix_direction+2));
     getnum= double( typecast(uint16(getnum), 'int16') );
@@ -9,7 +9,7 @@ function pointer = GetPointer(VT_OFFSET, data_, g_model, model_matrix_direction,
     field_offset = getnumber(g_model(vtable-model_matrix_direction+VT_OFFSET+1),g_model(vtable-model_matrix_direction+VT_OFFSET+2));
     
     
-    if field_offset > vtsize && limitation ==1
+    if VT_OFFSET >= vtsize
         field_offset = 0;
     end
 

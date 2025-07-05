@@ -382,7 +382,7 @@ TfLiteStatus InitializeRuntimeTensor(
 }  // namespace internal
 
 TfLiteStatus MicroAllocator::Init() {
-char debug_buffer[128];
+char debug_buffer[256];
 
 /*
 sprintf(debug_buffer, "Version: %d\r\n", model_->version());
@@ -534,11 +534,83 @@ for (size_t i = 0; i < subgraph_->tensors()->size(); i++) {
 
     if (quantparam) {
         sprintf(debug_buffer,
-            "  scale: %p  zero_point: %p  min: %p  max: %p\r\n",
+            "  scale: %p  zero_point: %p  min: %p  max: %p details %p details_type %d quantized dimension %d\r\n",
             (void*)quantparam->scale(),
             (void*)quantparam->zero_point(),
             (void*)quantparam->min(),
-            (void*)quantparam->max());
+            (void*)quantparam->max(),
+            (void*)quantparam->details(),
+            quantparam->details_type(),
+            quantparam->quantized_dimension());
+        PrintToUart(debug_buffer);
+    }
+}
+
+
+for (size_t i = 0; i < subgraph_->tensors()->size(); i++) {
+    const auto* quantparam = subgraph_->tensors()->Get(i)->quantization();
+    sprintf(debug_buffer, "Pointer to quantization of tensor %d: %p\r\n", i+1, (void*)quantparam);
+    PrintToUart(debug_buffer);
+
+    if (quantparam) {
+        // Print scale values
+        auto scale = quantparam->scale();
+        if (scale) {
+            sprintf(debug_buffer, "  scale size: %d values: ", (int)scale->size());
+            PrintToUart(debug_buffer);
+            for (unsigned j = 0; j < scale->size(); ++j) {
+                sprintf(debug_buffer, "%f ", scale->Get(j));
+                PrintToUart(debug_buffer);
+            }
+            PrintToUart("\r\n");
+        } else {
+            PrintToUart("  scale: (null)\r\n");
+        }
+
+        // Print zero_point values
+        auto zero_point = quantparam->zero_point();
+        if (zero_point) {
+            sprintf(debug_buffer, "  zero_point size: %d values: ", (int)zero_point->size());
+            PrintToUart(debug_buffer);
+            for (unsigned j = 0; j < zero_point->size(); ++j) {
+                sprintf(debug_buffer, "%f ", zero_point->Get(j));
+                PrintToUart(debug_buffer);
+            }
+            PrintToUart("\r\n");
+        } else {
+            PrintToUart("  zero_point: (null)\r\n");
+        }
+
+        // Print min values
+        auto min = quantparam->min();
+        if (min) {
+            sprintf(debug_buffer, "  min size: %d values: ", (int)min->size());
+            PrintToUart(debug_buffer);
+            for (unsigned j = 0; j < min->size(); ++j) {
+                sprintf(debug_buffer, "%f ", min->Get(j));
+                PrintToUart(debug_buffer);
+            }
+            PrintToUart("\r\n");
+        } else {
+            PrintToUart("  min: (null)\r\n");
+        }
+
+        // Print max values
+        auto max = quantparam->max();
+        if (max) {
+            sprintf(debug_buffer, "  max size: %d values: ", (int)max->size());
+            PrintToUart(debug_buffer);
+            for (unsigned j = 0; j < max->size(); ++j) {
+                sprintf(debug_buffer, "%f ", max->Get(j));
+                PrintToUart(debug_buffer);
+            }
+            PrintToUart("\r\n");
+        } else {
+            PrintToUart("  max: (null)\r\n");
+        }
+
+        // Print quantized_dimension
+        sprintf(debug_buffer, "  quantized_dimension: %d\r\n", quantparam->quantized_dimension());
         PrintToUart(debug_buffer);
     }
 }

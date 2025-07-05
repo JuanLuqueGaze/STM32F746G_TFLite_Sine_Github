@@ -8,6 +8,11 @@ function field = GetField(VT_OFFSET, data_, g_model, model_matrix_direction, dat
     % GetPointer
     field_offset = getnumber(g_model(vtable-model_matrix_direction+VT_OFFSET+1),g_model(vtable-model_matrix_direction+VT_OFFSET+2));
     
+    if VT_OFFSET >= vtsize
+        field_offset = 0;
+    end
+
+
     if field_offset == 0
         field = default_value;
     else    

@@ -8,7 +8,7 @@ tensor_arena_size= 4*1024;
 tensor_head = tensor_arena;
 tensor_tail = tensor_head + tensor_arena_size;
 
-model_matrix_direction = 0x0804994C;
+model_matrix_direction = 0x08049E10;
 model_direction = model_matrix_direction + getnumber(g_model(1),g_model(2));
 offsetmatrixmodel = getnumber(g_model(1),g_model(2));
 
@@ -218,29 +218,17 @@ end
 
 
 for i=1:subgraph.tensors.size
-
         subgraph.tensors.tensor(i).quantization.min = GetPointer(VT_QUANTIZATION.VT_MIN,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction);
-    fprintf('Tensor min pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.min));  
+    fprintf('Tensor min pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.scale));  
         subgraph.tensors.tensor(i).quantization.max = GetPointer(VT_QUANTIZATION.VT_MAX,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction);
-    fprintf('Tensor max pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.max));  
+    fprintf('Tensor max pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.scale));  
     subgraph.tensors.tensor(i).quantization.scale = GetPointer(VT_QUANTIZATION.VT_SCALE,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction);
     fprintf('Tensor scale pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.scale));
-        subgraph.tensors.tensor(i).quantization.zero_point = GetPointer(VT_QUANTIZATION.VT_ZERO_POINT,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction);
-    fprintf('Tensor zero point pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.zero_point));  
-        subgraph.tensors.tensor(i).quantization.details = GetPointer(VT_QUANTIZATION.VT_DETAILS,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction);
-    fprintf('Tensor details pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.details));  
-             subgraph.tensors.tensor(i).quantization.details_type = GetField(VT_QUANTIZATION.VT_DETAILS_TYPE,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction,1,0);
-    fprintf('Tensor details type of tensor %d is:  %d\n',i, subgraph.tensors.tensor(i).quantization.details_type);
-              subgraph.tensors.tensor(i).quantization.quantized_dimension = GetField(VT_QUANTIZATION.VT_QUANTIZED_DIMENSION,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction,4,0);
-    fprintf('Tensor quantized dimension of tensor %d is:  %d\n',i, subgraph.tensors.tensor(i).quantization.quantized_dimension);
-  
-end
-subgraph.tensors.size
-for i = 1:subgraph.tensors.size
-
-   subgraph.tensors.tensor(i).quantization.scale_content = GetVector(subgraph.tensors.tensor(i).quantization.scale,4,model_matrix_direction,g_model);
-   subgraph.tensors.tensor(i).quantization.zero_point_content = GetVector(subgraph.tensors.tensor(i).quantization.scale,8,model_matrix_direction,g_model);
+        subgraph.tensors.tensor(i).quantization.scale = GetPointer(VT_QUANTIZATION.VT_ZERO_POINT,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction);
+    fprintf('Tensor scale pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.scale));  
+        subgraph.tensors.tensor(i).quantization.scale = GetPointer(VT_QUANTIZATION.VT_SCALE,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction);
+    fprintf('Tensor scale pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.scale));  
+        subgraph.tensors.tensor(i).quantization.scale = GetPointer(VT_QUANTIZATION.VT_SCALE,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction);
+    fprintf('Tensor scale pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.scale));  
 
 end
-
-
