@@ -2419,8 +2419,8 @@ class Table {
     
     char buffer[64];
     /*sprintf(buffer, "data_ is : 0x%08lX\r\n", (unsigned long)(uintptr_t)data_);
-    PrintToUart(buffer);/*
-    sprintf(buffer, "Substract to data_ is : %ld\r\n", (long)ReadScalar<soffset_t>(data_));
+    PrintToUart(buffer);
+    /*sprintf(buffer, "Substract to data_ is : %ld\r\n", (long)ReadScalar<soffset_t>(data_));
     PrintToUart(buffer);*/
     return data_ - ReadScalar<soffset_t>(data_);
   }
@@ -2436,10 +2436,13 @@ class Table {
     PrintToUart(buffer);*/
     // The first element is the size of the vtable (fields + type id + itself).
     auto vtsize = ReadScalar<voffset_t>(vtable);
-    /*sprintf(buffer, "vtable size: %d\r\n", vtsize);
-    PrintToUart(buffer);*/
+    sprintf(buffer, "vtable size: %d\r\n", vtsize);
+    PrintToUart(buffer);
     // If the field we're accessing is outside the vtable, we're reading older
     // data, so it's the same as if the offset was 0 (not present).
+    sprintf(buffer, "Optional offset direction: 0x%08lX\r\n", (unsigned long)(uintptr_t)(vtable + field));
+    PrintToUart(buffer);
+
     return field < vtsize ? ReadScalar<voffset_t>(vtable + field) : 0;
   }
 
@@ -2457,10 +2460,10 @@ class Table {
     auto field_offset = GetOptionalFieldOffset(field);
     char buffer[64];
     /*sprintf(buffer, "data_ address: 0x%08lX\r\n", (unsigned long)(uintptr_t)data_);
-    PrintToUart(buffer);
+    PrintToUart(buffer);*/
     
     sprintf(buffer, "field_offset: %d\r\n", field_offset);
-    PrintToUart(buffer);*/
+    PrintToUart(buffer);
     auto p = data_ + field_offset;
     auto debugging_pointer = (p + ReadScalar<uoffset_t>(p));
     /*

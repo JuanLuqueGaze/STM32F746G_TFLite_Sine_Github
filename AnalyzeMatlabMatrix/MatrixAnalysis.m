@@ -8,7 +8,7 @@ tensor_arena_size= 4*1024;
 tensor_head = tensor_arena;
 tensor_tail = tensor_head + tensor_arena_size;
 
-model_matrix_direction = 0x0804979C;
+model_matrix_direction = 0x08049E10;
 model_direction = model_matrix_direction + getnumber(g_model(1),g_model(2));
 offsetmatrixmodel = getnumber(g_model(1),g_model(2));
 
@@ -56,7 +56,7 @@ fprintf('Tensor tail direction is 0x%s\n', dec2hex(tensor_tail));
             % GetOptionalFieldOffset runs GetVtable
 
             % GetVtable
-            pointer_to_subgraph = GetPointer(VT_MODEL.VT_SUBGRAPHS, model_direction, g_model, model_matrix_direction);
+            pointer_to_subgraph = GetPointer(VT_MODEL.VT_SUBGRAPHS, model_direction, g_model, model_matrix_direction,0);
             fprintf('Subgraph direction is 0x%s\n', dec2hex(pointer_to_subgraph));
             
             % Information about the subgraph: 
@@ -70,7 +70,7 @@ fprintf('Tensor tail direction is 0x%s\n', dec2hex(tensor_tail));
         subgraph.size = getnumber(g_model(pointer_to_subgraph-model_matrix_direction+1),g_model(pointer_to_subgraph-model_matrix_direction+2),g_model(pointer_to_subgraph-model_matrix_direction+3),g_model(pointer_to_subgraph-model_matrix_direction+4));
         subgraph.data_direction = pointer_to_subgraph + soffset_t_size + getnumber(g_model(pointer_to_subgraph-model_matrix_direction+soffset_t_size+1),g_model(pointer_to_subgraph-model_matrix_direction+soffset_t_size+2),g_model(pointer_to_subgraph-model_matrix_direction+soffset_t_size+3),g_model(pointer_to_subgraph-model_matrix_direction+soffset_t_size+4));  
         fprintf('Subgraph data direction is 0x%s\n', dec2hex(subgraph.data_direction));
-        subgraph.tensor_pointer = GetPointer(VT_SUBGRAPHS.VT_TENSORS, subgraph.data_direction, g_model, model_matrix_direction);
+        subgraph.tensor_pointer = GetPointer(VT_SUBGRAPHS.VT_TENSORS, subgraph.data_direction, g_model, model_matrix_direction,0);
         fprintf('Tensor direction is 0x%s\n', dec2hex(subgraph.tensor_pointer));  
 
 
@@ -81,12 +81,12 @@ fprintf('Tensor tail direction is 0x%s\n', dec2hex(tensor_tail));
         model.data_ = model_direction;
         model.vtable = model.data_ - getnumber(g_model(model.data_ - model_matrix_direction+1),g_model(model.data_ - model_matrix_direction+2));
         model.version = GetField(VT_MODEL.VT_VERSION, model.data_, g_model, model_matrix_direction,2,0);
-        model.operator_codes = GetPointer(VT_MODEL.VT_OPERATOR_CODES, model_direction, g_model, model_matrix_direction);
-        model.subgraphs = GetPointer(VT_MODEL.VT_SUBGRAPHS, model_direction, g_model, model_matrix_direction);
-        model.description = GetPointer(VT_MODEL.VT_DESCRIPTION, model_direction, g_model, model_matrix_direction);
-        model.buffers = GetPointer(VT_MODEL.VT_BUFFERS, model_direction, g_model, model_matrix_direction);
-        model.metadata_buffer = GetPointer(VT_MODEL.VT_METADATA_BUFFER, model_direction, g_model, model_matrix_direction);
-        model.metadata = GetPointer(VT_MODEL.VT_METADATA, model_direction, g_model, model_matrix_direction);
+        model.operator_codes = GetPointer(VT_MODEL.VT_OPERATOR_CODES, model_direction, g_model, model_matrix_direction,0);
+        model.subgraphs = GetPointer(VT_MODEL.VT_SUBGRAPHS, model_direction, g_model, model_matrix_direction,0);
+        model.description = GetPointer(VT_MODEL.VT_DESCRIPTION, model_direction, g_model, model_matrix_direction,0);
+        model.buffers = GetPointer(VT_MODEL.VT_BUFFERS, model_direction, g_model, model_matrix_direction,0);
+        model.metadata_buffer = GetPointer(VT_MODEL.VT_METADATA_BUFFER, model_direction, g_model, model_matrix_direction,0);
+        model.metadata = GetPointer(VT_MODEL.VT_METADATA, model_direction, g_model, model_matrix_direction,0);
 
         fprintf(['model analysis:\n' ...
         '  data_: 0x%X\n' ...
@@ -118,7 +118,7 @@ for i=1:operator_codes.size
     fprintf('Operator codes pointer 0x%s\n', dec2hex(operator_codes.operator(i).pointer));  
     operator_codes.operator(i).builtin_code=GetField(VT_OPERATORS.VT_BUILTIN_CODE, operator_codes.operator(i).pointer, g_model, model_matrix_direction,1,0);
     operator_codes.operator(i).version=GetField(VT_OPERATORS.VT_VERSION, operator_codes.operator(i).pointer, g_model, model_matrix_direction,2,1);
-    operator_codes.operator(i).custom_code = GetPointer(VT_OPERATORS.VT_CUSTOM_CODE, operator_codes.operator(i).pointer, g_model, model_matrix_direction);
+    operator_codes.operator(i).custom_code = GetPointer(VT_OPERATORS.VT_CUSTOM_CODE, operator_codes.operator(i).pointer, g_model, model_matrix_direction,0);
 end
 
         fprintf(['operator codes analysis:\n' ...
@@ -153,11 +153,11 @@ subgraph.size = getnumber(g_model(model.subgraphs-model_matrix_direction+1),g_mo
 
 %It only allows 1 subgraph
 subgraph.direction=model.subgraphs + soffset_t_size + getnumber(g_model(model.subgraphs-model_matrix_direction+soffset_t_size+1),g_model(model.subgraphs-model_matrix_direction+soffset_t_size+2),g_model(model.subgraphs-model_matrix_direction+soffset_t_size+3),g_model(model.subgraphs-model_matrix_direction+soffset_t_size+4));
-subgraph.tensors.direction = GetPointer(VT_SUBGRAPHS.VT_TENSORS, subgraph.direction, g_model, model_matrix_direction);
-subgraph.inputs.direction = GetPointer(VT_SUBGRAPHS.VT_INPUTS, subgraph.direction, g_model, model_matrix_direction);
-subgraph.outputs.direction = GetPointer(VT_SUBGRAPHS.VT_OUTPUTS, subgraph.direction, g_model, model_matrix_direction);
-subgraph.operators.direction = GetPointer(VT_SUBGRAPHS.VT_OPERATORS, subgraph.direction, g_model, model_matrix_direction);
-subgraph.name.direction = GetPointer(VT_SUBGRAPHS.VT_NAME, subgraph.direction, g_model, model_matrix_direction);
+subgraph.tensors.direction = GetPointer(VT_SUBGRAPHS.VT_TENSORS, subgraph.direction, g_model, model_matrix_direction,0);
+subgraph.inputs.direction = GetPointer(VT_SUBGRAPHS.VT_INPUTS, subgraph.direction, g_model, model_matrix_direction,0);
+subgraph.outputs.direction = GetPointer(VT_SUBGRAPHS.VT_OUTPUTS, subgraph.direction, g_model, model_matrix_direction,0);
+subgraph.operators.direction = GetPointer(VT_SUBGRAPHS.VT_OPERATORS, subgraph.direction, g_model, model_matrix_direction,0);
+subgraph.name.direction = GetPointer(VT_SUBGRAPHS.VT_NAME, subgraph.direction, g_model, model_matrix_direction,0);
 
 fprintf(['Subgraph analysis:\n' ...
         '  direction: 0x%X\n' ...
@@ -183,7 +183,7 @@ subgraph.tensors.size = getnumber(g_model(subgraph.tensors.direction-model_matri
 
 for i=1:subgraph.tensors.size
     subgraph.tensors.tensor(i).pointer=subgraph.tensors.direction + soffset_t_size*i + getnumber(g_model(subgraph.tensors.direction-model_matrix_direction+soffset_t_size*i+1),g_model(subgraph.tensors.direction-model_matrix_direction+soffset_t_size*i+2),g_model(subgraph.tensors.direction-model_matrix_direction+soffset_t_size*i+3),g_model(subgraph.tensors.direction-model_matrix_direction+soffset_t_size*i+4));
-    subgraph.tensors.tensor(i).shape_pointer = GetPointer(VT_TENSORS.VT_SHAPE,subgraph.tensors.tensor(i).pointer, g_model, model_matrix_direction);
+    subgraph.tensors.tensor(i).shape_pointer = GetPointer(VT_TENSORS.VT_SHAPE,subgraph.tensors.tensor(i).pointer, g_model, model_matrix_direction,0);
     fprintf('Tensor shape pointer of tensor %d is:  0x%s\n',i, dec2hex(subgraph.tensors.tensor(i).shape_pointer));  
     subgraph.tensors.tensor(i).type = GetField(VT_TENSORS.VT_TYPE,subgraph.tensors.tensor(i).pointer, g_model, model_matrix_direction,1,0);
     fprintf('Tensor type of tensor %d is:  %d\n',i, subgraph.tensors.tensor(i).type);
@@ -191,14 +191,35 @@ for i=1:subgraph.tensors.size
     fprintf('Tensor buffer of tensor %d is:  %d\n',i, subgraph.tensors.tensor(i).buffer); 
     subgraph.tensors.tensor(i).name_pointer = GetPointer(VT_TENSORS.VT_NAME,subgraph.tensors.tensor(i).pointer, g_model, model_matrix_direction);
     fprintf('Tensor name pointer of tensor %d is:  0x%s\n',i, dec2hex(subgraph.tensors.tensor(i).name_pointer));  
-    subgraph.tensors.tensor(i).quantization_pointer = GetPointer(VT_TENSORS.VT_QUANTIZATION,subgraph.tensors.tensor(i).pointer, g_model, model_matrix_direction);
+    subgraph.tensors.tensor(i).quantization_pointer = GetPointer(VT_TENSORS.VT_QUANTIZATION,subgraph.tensors.tensor(i).pointer, g_model, model_matrix_direction,0);
     fprintf('Tensor quantization pointer of tensor %d is:  0x%s\n',i, dec2hex(subgraph.tensors.tensor(i).quantization_pointer));  
     subgraph.tensors.tensor(i).is_variable = GetField(VT_TENSORS.VT_IS_VARIABLE,subgraph.tensors.tensor(i).pointer, g_model, model_matrix_direction,2,0);
     fprintf('Tensor is_variable of tensor %d is:  %d\n',i, subgraph.tensors.tensor(i).is_variable); 
-    subgraph.tensors.tensor(i).sparsity_pointer = GetPointer(VT_TENSORS.VT_SPARSITY,subgraph.tensors.tensor(i).pointer, g_model, model_matrix_direction);
+    subgraph.tensors.tensor(i).sparsity_pointer = GetPointer(VT_TENSORS.VT_SPARSITY,subgraph.tensors.tensor(i).pointer, g_model, model_matrix_direction,0);
     fprintf('Tensor sparsity pointer of tensor %d is:  0x%s\n',i, dec2hex(subgraph.tensors.tensor(i).sparsity_pointer));  
-    subgraph.tensors.tensor(i).shape_signature_pointer = GetPointer(VT_TENSORS.VT_SHAPE_SIGNATURE,subgraph.tensors.tensor(i).pointer, g_model, model_matrix_direction);
+    subgraph.tensors.tensor(i).shape_signature_pointer = GetPointer(VT_TENSORS.VT_SHAPE_SIGNATURE,subgraph.tensors.tensor(i).pointer, g_model, model_matrix_direction,0);
     fprintf('Tensor shape signature pointer of tensor %d is:  0x%s\n',i, dec2hex(subgraph.tensors.tensor(i).shape_signature_pointer));  
     fprintf('\n');  
+
+end
+
+%% Getting inside of the tensor shape 
+for i=1:subgraph.tensors.size
+    subgraph.tensors.tensor(i).shape = GetVector(subgraph.tensors.tensor(i).shape_pointer,4,model_matrix_direction,g_model);
+end
+
+%% Getting inside of the tensor name
+for i=1:subgraph.tensors.size
+    subgraph.tensors.tensor(i).name = char(GetVector(subgraph.tensors.tensor(i).name_pointer,1,model_matrix_direction,g_model));
+end
+
+%% Getting inside of the tensor quantization parameters
+
+
+
+for i=1:subgraph.tensors.size
+    
+    subgraph.tensors.tensor(i).quantization.scale = GetPointer(VT_QUANTIZATION.VT_SCALE,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction,1);
+    fprintf('Tensor sccale pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.scale));  
 
 end

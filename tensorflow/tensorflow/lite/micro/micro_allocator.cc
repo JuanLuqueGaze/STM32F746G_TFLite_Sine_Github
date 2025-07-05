@@ -491,6 +491,77 @@ for (uint32_t i = 0; i < operator_codes->size(); ++i) {
     sprintf(debug_buffer, "Pointer to shape signature of tensor %d: %p\r\n\n",i+1, (void*)subgraph_->tensors()->Get(i)->shape_signature());
     PrintToUart(debug_buffer);
 }
+
+/* PrintToUart("TENSORS SHAPE VALUES\r\n");
+
+  for (size_t i = 0; i < subgraph_->tensors()->size(); i++) {
+    const auto* shape_vec = subgraph_->tensors()->Get(i)->shape();
+    sprintf(debug_buffer, "Shape of tensor %d: ", static_cast<int>(i + 1));
+    PrintToUart(debug_buffer);
+    if (shape_vec) {
+      for (size_t d = 0; d < shape_vec->size(); ++d) {
+        sprintf(debug_buffer, "%d ", shape_vec->Get(d));
+        PrintToUart(debug_buffer);
+      }
+      PrintToUart("\r\n");
+    } else {
+      PrintToUart("None\r\n");
+    }
+  } */
+/*
+  PrintToUart("TENSOR NAME VALUES");
+  for (size_t i = 0; i < subgraph_->tensors()->size(); i++) {
+    // ...existing prints...
+    sprintf(debug_buffer, "Pointer to name of tensor %d: %p\r\n", i+1, (void*)subgraph_->tensors()->Get(i)->name());
+    PrintToUart(debug_buffer);
+
+    // Print the actual name string
+    const auto* name_ptr = subgraph_->tensors()->Get(i)->name();
+    if (name_ptr) {
+        sprintf(debug_buffer, "Name of tensor %d: %s\r\n", i+1, name_ptr->c_str());
+        PrintToUart(debug_buffer);
+    } else {
+        sprintf(debug_buffer, "Name of tensor %d: (null)\r\n", i+1);
+        PrintToUart(debug_buffer);
+    }
+    // ...rest of your prints...
+}*/
+
+for (size_t i = 0; i < subgraph_->tensors()->size(); i++) {
+    const auto* quantparam = subgraph_->tensors()->Get(i)->quantization();
+    sprintf(debug_buffer, "Pointer to quantization of tensor %d: %p\r\n", i+1, (void*)quantparam);
+    PrintToUart(debug_buffer);
+
+    if (quantparam) {
+        sprintf(debug_buffer,
+            "  scale: %p  zero_point: %p  min: %p  max: %p\r\n",
+            (void*)quantparam->scale(),
+            (void*)quantparam->zero_point(),
+            (void*)quantparam->min(),
+            (void*)quantparam->max());
+        PrintToUart(debug_buffer);
+    }
+}
+
+
+/*
+  void* scale_vec_ptr      = (void*)quantparam->scale();
+  void* zp_vec_ptr         = (void*)quantparam->zero_point();
+  void* min_vec_ptr        = (void*)quantparam->min();
+  void* max_vec_ptr        = (void*)quantparam->max();
+
+   sprintf(debug_buffer,
+          "Tensor 1 quant pointers:\n"
+          "  scale_vec:%p  zp_vec:%p  min_vec:%p  max_vec:%p\n",
+          scale_vec_ptr,   zp_vec_ptr,   min_vec_ptr,   max_vec_ptr);
+  PrintToUart(debug_buffer);*/
+
+
+    for (size_t i = 0; i < subgraph_->tensors()->size(); i++) {
+      sprintf(debug_buffer, "Pointer to shape of tensor %d: %p\r\n",i+1, (void*)subgraph_->tensors()->Get(i)->shape());
+      PrintToUart(debug_buffer);
+    }
+
   context_->tensors =
       reinterpret_cast<TfLiteTensor*>(memory_allocator_->AllocateFromTail(
           sizeof(TfLiteTensor) * context_->tensors_size,
