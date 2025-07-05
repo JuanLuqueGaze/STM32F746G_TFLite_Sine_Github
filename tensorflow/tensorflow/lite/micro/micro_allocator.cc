@@ -442,7 +442,7 @@ for (uint32_t i = 0; i < operator_codes->size(); ++i) {
   PrintToUart(debug_buffer);
   sprintf(debug_buffer, "Subgraph size: %d \r\n", subgraphs->size());
   PrintToUart(debug_buffer);
-/*
+
   const auto* tensors_ptr = subgraph_->tensors();
   const auto* inputs_ptr = subgraph_->inputs();
   const auto* outputs_ptr = subgraph_->outputs();
@@ -465,9 +465,9 @@ for (uint32_t i = 0; i < operator_codes->size(); ++i) {
   PrintToUart(debug_buffer);
   
   sprintf(debug_buffer, "It has to allocate %ld tensors, of %d bytes with %d alignment\r\n", subgraph_->tensors()->size(),sizeof(TfLiteTensor) * context_->tensors_size,alignof(TfLiteTensor));
-  PrintToUart(debug_buffer);*/
+  PrintToUart(debug_buffer);
 
-
+/*
   PrintToUart("TENSORS INFO\r\n");
 
   sprintf(debug_buffer, "Size: %d\r\n", subgraph_->tensors()->size());
@@ -491,7 +491,7 @@ for (uint32_t i = 0; i < operator_codes->size(); ++i) {
     sprintf(debug_buffer, "Pointer to shape signature of tensor %d: %p\r\n\n",i+1, (void*)subgraph_->tensors()->Get(i)->shape_signature());
     PrintToUart(debug_buffer);
 }
-
+*/
 /* PrintToUart("TENSORS SHAPE VALUES\r\n");
 
   for (size_t i = 0; i < subgraph_->tensors()->size(); i++) {
@@ -526,7 +526,7 @@ for (uint32_t i = 0; i < operator_codes->size(); ++i) {
     }
     // ...rest of your prints...
 }*/
-
+/*
 for (size_t i = 0; i < subgraph_->tensors()->size(); i++) {
     const auto* quantparam = subgraph_->tensors()->Get(i)->quantization();
     sprintf(debug_buffer, "Pointer to quantization of tensor %d: %p\r\n", i+1, (void*)quantparam);
@@ -544,9 +544,9 @@ for (size_t i = 0; i < subgraph_->tensors()->size(); i++) {
             quantparam->quantized_dimension());
         PrintToUart(debug_buffer);
     }
-}
+}*/
 
-
+/*
 for (size_t i = 0; i < subgraph_->tensors()->size(); i++) {
     const auto* quantparam = subgraph_->tensors()->Get(i)->quantization();
     sprintf(debug_buffer, "Pointer to quantization of tensor %d: %p\r\n", i+1, (void*)quantparam);
@@ -614,7 +614,7 @@ for (size_t i = 0; i < subgraph_->tensors()->size(); i++) {
         PrintToUart(debug_buffer);
     }
 }
-
+*/
 
 /*
   void* scale_vec_ptr      = (void*)quantparam->scale();
@@ -626,13 +626,172 @@ for (size_t i = 0; i < subgraph_->tensors()->size(); i++) {
           "Tensor 1 quant pointers:\n"
           "  scale_vec:%p  zp_vec:%p  min_vec:%p  max_vec:%p\n",
           scale_vec_ptr,   zp_vec_ptr,   min_vec_ptr,   max_vec_ptr);
-  PrintToUart(debug_buffer);*/
+  PrintToUart(debug_buffer);
 
 
     for (size_t i = 0; i < subgraph_->tensors()->size(); i++) {
       sprintf(debug_buffer, "Pointer to shape of tensor %d: %p\r\n",i+1, (void*)subgraph_->tensors()->Get(i)->shape());
       PrintToUart(debug_buffer);
     }
+*/
+
+
+  PrintToUart("SUBGRAPH INPUTS:\r\n");
+  const auto* inputs_vec = subgraph_->inputs();
+  if (inputs_vec) {
+      sprintf(debug_buffer, "Number of inputs: %d\r\n", (int)inputs_vec->size());
+      PrintToUart(debug_buffer);
+      for (size_t i = 0; i < inputs_vec->size(); ++i) {
+          sprintf(debug_buffer, "Input %d: tensor index %d\r\n", (int)i, (int)inputs_vec->Get(i));
+          PrintToUart(debug_buffer);
+      }
+  } else {
+      PrintToUart("No inputs vector found.\r\n");
+  }
+
+  
+  PrintToUart("SUBGRAPH OUTPUTS:\r\n");
+  const auto* outputs_vec = subgraph_->outputs();
+  if (outputs_vec) {
+      sprintf(debug_buffer, "Number of outputs: %d\r\n", (int)outputs_vec->size());
+      PrintToUart(debug_buffer);
+      for (size_t i = 0; i < outputs_vec->size(); ++i) {
+          sprintf(debug_buffer, "Outputs %d: tensor index %d\r\n", (int)i, (int)outputs_vec->Get(i));
+          PrintToUart(debug_buffer);
+      }
+  } else {
+      PrintToUart("No outputs vector found.\r\n");
+  }
+auto* operators_vec = subgraph_ ? subgraph_->operators() : nullptr;
+
+  PrintToUart("SUBGRAPH OPERATORS:\r\n");
+if (subgraph_) {
+
+    if (operators_vec) {
+        for (size_t op_idx = 0; op_idx < operators_vec->size(); ++op_idx) {
+            const auto* op = operators_vec->Get(op_idx);
+            sprintf(debug_buffer,
+                "Subgraph 0, Operator %d, opcode_index: %d\r\n",
+                (int)op_idx, (int)op->opcode_index());
+            PrintToUart(debug_buffer);
+            sprintf(debug_buffer,
+                "Subgraph 0, Operator %d, input pointer: %p\r\n",
+                (int)op_idx, (void*)subgraph_->operators()->Get(op_idx)->inputs());
+            PrintToUart(debug_buffer);
+            sprintf(debug_buffer,
+                "Subgraph 0, Operator %d, output pointer: %p\r\n",
+                (int)op_idx, (void*)subgraph_->operators()->Get(op_idx)->outputs());
+            PrintToUart(debug_buffer);
+            sprintf(debug_buffer,
+                "Subgraph 0, Operator %d, builtin options type: %d\r\n",
+                (int)op_idx, subgraph_->operators()->Get(op_idx)->builtin_options_type());
+            PrintToUart(debug_buffer);
+            sprintf(debug_buffer,
+                "Subgraph 0, Operator %d, builtin options pointer: %p\r\n",
+                (int)op_idx, (void*)subgraph_->operators()->Get(op_idx)->builtin_options());
+            PrintToUart(debug_buffer);
+            sprintf(debug_buffer,
+                "Subgraph 0, Operator %d, custom options pointer: %p\r\n",
+                (int)op_idx, (void*)subgraph_->operators()->Get(op_idx)->custom_options());
+            PrintToUart(debug_buffer);
+            sprintf(debug_buffer,
+                "Subgraph 0, Operator %d, custom options format: %d\r\n",
+                (int)op_idx, subgraph_->operators()->Get(op_idx)->custom_options_format());
+            PrintToUart(debug_buffer);
+            sprintf(debug_buffer,
+                "Subgraph 0, Operator %d, mutating_variable_inputs pointer: %p\r\n",
+                (int)op_idx, (void*)subgraph_->operators()->Get(op_idx)->mutating_variable_inputs());
+            PrintToUart(debug_buffer);
+            sprintf(debug_buffer,
+                "Subgraph 0, Operator %d, intermediates pointer: %p\r\n",
+                (int)op_idx, (void*)subgraph_->operators()->Get(op_idx)->intermediates());
+            PrintToUart(debug_buffer);
+        }
+    } else {
+        PrintToUart("No operators vector found.\r\n");
+    }
+} else {
+    PrintToUart("No subgraph found.\r\n");
+}
+
+
+for (size_t op_idx = 0; op_idx < operators_vec->size(); ++op_idx) {
+    const auto* op = operators_vec->Get(op_idx);
+
+    // Print operator index and opcode index
+    sprintf(debug_buffer, "Subgraph 0, Operator %d, opcode_index: %d\r\n",
+            (int)op_idx, (int)op->opcode_index());
+    PrintToUart(debug_buffer);
+
+    // Print input tensor indices
+    const auto* inputs = op->inputs();
+    if (inputs) {
+        sprintf(debug_buffer, "  inputs: ");
+        PrintToUart(debug_buffer);
+        for (size_t i = 0; i < inputs->size(); ++i) {
+            sprintf(debug_buffer, "%d ", inputs->Get(i));
+            PrintToUart(debug_buffer);
+        }
+        PrintToUart("\r\n");
+    } else {
+        PrintToUart("  inputs: (null)\r\n");
+    }
+
+    // Print output tensor indices
+    const auto* outputs = op->outputs();
+    if (outputs) {
+        sprintf(debug_buffer, "  outputs: ");
+        PrintToUart(debug_buffer);
+        for (size_t i = 0; i < outputs->size(); ++i) {
+            sprintf(debug_buffer, "%d ", outputs->Get(i));
+            PrintToUart(debug_buffer);
+        }
+        PrintToUart("\r\n");
+    } else {
+        PrintToUart("  outputs: (null)\r\n");
+    }
+}
+
+PrintToUart("MODEL BUFFERS:\r\n");
+const auto* buffers_vec = model_->buffers();
+if (buffers_vec) {
+    sprintf(debug_buffer, "Number of buffers: %d\r\n", (int)buffers_vec->size());
+    PrintToUart(debug_buffer);
+    for (size_t i = 0; i < buffers_vec->size(); ++i) {
+        const auto* buffer = buffers_vec->Get(i);
+        sprintf(debug_buffer, "Buffer %d: ptr=%p, data ptr=%p, size=%d\r\n",
+                (int)i,
+                (void*)buffer,
+                (void*)buffer->data(),
+                buffer && buffer->data() ? (int)buffer->data()->size() : 0);
+        PrintToUart(debug_buffer);
+    }
+} else {
+    PrintToUart("No buffers vector found.\r\n");
+}
+
+PrintToUart("MODEL METADATA:\r\n");
+const auto* metadata_vec = model_->metadata();
+if (metadata_vec) {
+    sprintf(debug_buffer, "Number of metadata entries: %d\r\n", (int)metadata_vec->size());
+    PrintToUart(debug_buffer);
+    for (size_t i = 0; i < metadata_vec->size(); ++i) {
+        const auto* metadata = metadata_vec->Get(i);
+        sprintf(debug_buffer, "Metadata %d: ptr=%p, name ptr=%p, buffer=%d\r\n",
+                (int)i,
+                (void*)metadata,
+                (void*)metadata->name(),
+                metadata ? metadata->buffer() : -1);
+        PrintToUart(debug_buffer);
+        if (metadata && metadata->name()) {
+            sprintf(debug_buffer, "  name: %s\r\n", metadata->name()->c_str());
+            PrintToUart(debug_buffer);
+        }
+    }
+} else {
+    PrintToUart("No metadata vector found.\r\n");
+}
+
 
   context_->tensors =
       reinterpret_cast<TfLiteTensor*>(memory_allocator_->AllocateFromTail(

@@ -22,6 +22,9 @@ function field = GetField(VT_OFFSET, data_, g_model, model_matrix_direction, dat
             if data_size == 1
             field = getnumber(g_model(data_-model_matrix_direction+field_offset+1));
             end
+            if data_size == 4
+            field = getnumber(g_model(data_-model_matrix_direction+field_offset+1),g_model(data_-model_matrix_direction+field_offset+2),g_model(data_-model_matrix_direction+field_offset+3),g_model(data_-model_matrix_direction+field_offset+4));
+            end
         end
     end
 

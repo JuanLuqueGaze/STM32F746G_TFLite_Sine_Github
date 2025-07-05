@@ -8,7 +8,7 @@ tensor_arena_size= 4*1024;
 tensor_head = tensor_arena;
 tensor_tail = tensor_head + tensor_arena_size;
 
-model_matrix_direction = 0x08049E10;
+model_matrix_direction = 0x0804B69C;
 model_direction = model_matrix_direction + getnumber(g_model(1),g_model(2));
 offsetmatrixmodel = getnumber(g_model(1),g_model(2));
 
@@ -218,17 +218,90 @@ end
 
 
 for i=1:subgraph.tensors.size
+
         subgraph.tensors.tensor(i).quantization.min = GetPointer(VT_QUANTIZATION.VT_MIN,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction);
-    fprintf('Tensor min pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.scale));  
+    fprintf('Tensor min pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.min));  
         subgraph.tensors.tensor(i).quantization.max = GetPointer(VT_QUANTIZATION.VT_MAX,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction);
-    fprintf('Tensor max pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.scale));  
+    fprintf('Tensor max pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.max));  
     subgraph.tensors.tensor(i).quantization.scale = GetPointer(VT_QUANTIZATION.VT_SCALE,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction);
     fprintf('Tensor scale pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.scale));
-        subgraph.tensors.tensor(i).quantization.scale = GetPointer(VT_QUANTIZATION.VT_ZERO_POINT,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction);
-    fprintf('Tensor scale pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.scale));  
-        subgraph.tensors.tensor(i).quantization.scale = GetPointer(VT_QUANTIZATION.VT_SCALE,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction);
-    fprintf('Tensor scale pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.scale));  
-        subgraph.tensors.tensor(i).quantization.scale = GetPointer(VT_QUANTIZATION.VT_SCALE,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction);
-    fprintf('Tensor scale pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.scale));  
+        subgraph.tensors.tensor(i).quantization.zero_point = GetPointer(VT_QUANTIZATION.VT_ZERO_POINT,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction);
+    fprintf('Tensor zero point pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.zero_point));  
+        subgraph.tensors.tensor(i).quantization.details = GetPointer(VT_QUANTIZATION.VT_DETAILS,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction);
+    fprintf('Tensor details pointer of tensor %d is:  0x%s\n',i, dec2hex( subgraph.tensors.tensor(i).quantization.details));  
+             subgraph.tensors.tensor(i).quantization.details_type = GetField(VT_QUANTIZATION.VT_DETAILS_TYPE,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction,1,0);
+    fprintf('Tensor details type of tensor %d is:  %d\n',i, subgraph.tensors.tensor(i).quantization.details_type);
+              subgraph.tensors.tensor(i).quantization.quantized_dimension = GetField(VT_QUANTIZATION.VT_QUANTIZED_DIMENSION,subgraph.tensors.tensor(i).quantization_pointer, g_model, model_matrix_direction,4,0);
+    fprintf('Tensor quantized dimension of tensor %d is:  %d\n',i, subgraph.tensors.tensor(i).quantization.quantized_dimension);
+  
+end
+
+for i = 1:subgraph.tensors.size
+
+   subgraph.tensors.tensor(i).quantization.scale_content = GetVector(subgraph.tensors.tensor(i).quantization.scale,4,model_matrix_direction,g_model);
+   subgraph.tensors.tensor(i).quantization.zero_point_content = GetVector(subgraph.tensors.tensor(i).quantization.scale,8,model_matrix_direction,g_model);
 
 end
+
+%% Getting input and output
+
+for i=1:subgraph.size
+    subgraph.inputs.content = GetVector(subgraph.inputs.direction,4,model_matrix_direction,g_model);
+    subgraph.outputs.content = GetVector(subgraph.outputs.direction,4,model_matrix_direction,g_model);
+end
+
+
+
+%% Getting subgraph operator
+
+
+subgraph.operators.size = getnumber(g_model(subgraph.operators.direction-model_matrix_direction+1),g_model(subgraph.operators.direction-model_matrix_direction+2),g_model(subgraph.operators.direction-model_matrix_direction+3),g_model(subgraph.operators.direction-model_matrix_direction+4));
+
+for i=1:subgraph.operators.size
+    subgraph.operators.operator(i).pointer= subgraph.operators.direction + soffset_t_size*i + getnumber(g_model(subgraph.operators.direction-model_matrix_direction+soffset_t_size*i+1),g_model(subgraph.operators.direction-model_matrix_direction+soffset_t_size*i+2),g_model(subgraph.operators.direction-model_matrix_direction+soffset_t_size*i+3),g_model(subgraph.operators.direction-model_matrix_direction+soffset_t_size*i+4));
+    fprintf('Operator codes pointer 0x%s\n', dec2hex(subgraph.operators.operator(i).pointer));  
+    subgraph.operators.operator(i).op_code_index=GetField(VT_OPERATOR.VT_OPCODE_INDEX, subgraph.operators.operator(i).pointer, g_model, model_matrix_direction,4,0);
+    fprintf('Op code index of operator %d is:  %d\n',i, subgraph.operators.operator(i).op_code_index);
+    subgraph.operators.operator(i).inputs_pointer = GetPointer(VT_OPERATOR.VT_INPUTS,subgraph.operators.operator(i).pointer, g_model, model_matrix_direction);
+    fprintf('Input pointer of operator %d is:  0x%s\n',i, dec2hex(subgraph.operators.operator(i).inputs_pointer));  
+    subgraph.operators.operator(i).outputs_pointer = GetPointer(VT_OPERATOR.VT_OUTPUTS,subgraph.operators.operator(i).pointer, g_model, model_matrix_direction);
+    fprintf('Output pointer of operator %d is:  0x%s\n',i, dec2hex(subgraph.operators.operator(i).outputs_pointer));  
+    subgraph.operators.operator(i).builtin_options_type = GetField(VT_OPERATOR.VT_BUILTIN_OPTIONS_TYPE,subgraph.operators.operator(i).pointer, g_model, model_matrix_direction,1,0);
+    fprintf('Builtin type of operator %d is:  %d\n',i, subgraph.operators.operator(i).builtin_options_type);  
+    subgraph.operators.operator(i).builtin_options_pointer = GetPointer(VT_OPERATOR.VT_BUILTIN_OPTIONS,subgraph.operators.operator(i).pointer, g_model, model_matrix_direction);
+    fprintf('Builtin options pointer of operator %d is:  0x%s\n',i, dec2hex(subgraph.operators.operator(i).builtin_options_pointer));  
+    subgraph.operators.operator(i).custom_options_pointer = GetPointer(VT_OPERATOR.VT_CUSTOM_OPTIONS,subgraph.operators.operator(i).pointer, g_model, model_matrix_direction);
+    fprintf('Custom options pointer of operator %d is:  0x%s\n',i, dec2hex(subgraph.operators.operator(i).custom_options_pointer));  
+    subgraph.operators.operator(i).custom_options_format = GetField(VT_OPERATOR.VT_CUSTOM_OPTIONS_FORMAT,subgraph.operators.operator(i).pointer, g_model, model_matrix_direction,1,0);
+    fprintf('Custom options format of operator %d is:  %d\n',i, subgraph.operators.operator(i).custom_options_format);  
+    subgraph.operators.operator(i).mutating_variable_inputs_pointer = GetPointer(VT_OPERATOR.VT_MUTATING_VARIABLE_INPUTS,subgraph.operators.operator(i).pointer, g_model, model_matrix_direction);
+    fprintf('Mutating variable inputs pointer of operator %d is:  0x%s\n',i, dec2hex(subgraph.operators.operator(i).mutating_variable_inputs_pointer));  
+    subgraph.operators.operator(i).intermediates_pointer = GetPointer(VT_OPERATOR.VT_INTERMEDIATES,subgraph.operators.operator(i).pointer, g_model, model_matrix_direction);
+    fprintf('Intermediates pointer of operator %d is:  0x%s\n',i, dec2hex(subgraph.operators.operator(i).intermediates_pointer));  
+end
+
+
+%% Contents of the pointers above
+
+
+for i=1:subgraph.operators.size
+    subgraph.operators.operator(i).op_code_index=GetField(VT_OPERATOR.VT_OPCODE_INDEX, subgraph.operators.operator(i).pointer, g_model, model_matrix_direction,4,0);
+    fprintf('Op code index of operator %d is:  %d\n',i, subgraph.operators.operator(i).op_code_index);
+    subgraph.operators.operator(i).inputs_pointer = GetPointer(VT_OPERATOR.VT_INPUTS,subgraph.operators.operator(i).pointer, g_model, model_matrix_direction);
+    fprintf('Input pointer of operator %d is:  0x%s\n',i, dec2hex(subgraph.operators.operator(i).inputs_pointer));  
+    subgraph.operators.operator(i).outputs_pointer = GetPointer(VT_OPERATOR.VT_OUTPUTS,subgraph.operators.operator(i).pointer, g_model, model_matrix_direction);
+    fprintf('Output pointer of operator %d is:  0x%s\n',i, dec2hex(subgraph.operators.operator(i).outputs_pointer));  
+    subgraph.operators.operator(i).builtin_options_type = GetField(VT_OPERATOR.VT_BUILTIN_OPTIONS_TYPE,subgraph.operators.operator(i).pointer, g_model, model_matrix_direction,1,0);
+    fprintf('Builtin type of operator %d is:  %d\n',i, subgraph.operators.operator(i).builtin_options_type);  
+    subgraph.operators.operator(i).builtin_options_pointer = GetPointer(VT_OPERATOR.VT_BUILTIN_OPTIONS,subgraph.operators.operator(i).pointer, g_model, model_matrix_direction);
+    fprintf('Builtin options pointer of operator %d is:  0x%s\n',i, dec2hex(subgraph.operators.operator(i).builtin_options_pointer));  
+    subgraph.operators.operator(i).custom_options_pointer = GetPointer(VT_OPERATOR.VT_CUSTOM_OPTIONS,subgraph.operators.operator(i).pointer, g_model, model_matrix_direction);
+    fprintf('Custom options pointer of operator %d is:  0x%s\n',i, dec2hex(subgraph.operators.operator(i).custom_options_pointer));  
+    subgraph.operators.operator(i).custom_options_format = GetField(VT_OPERATOR.VT_CUSTOM_OPTIONS_FORMAT,subgraph.operators.operator(i).pointer, g_model, model_matrix_direction,1,0);
+    fprintf('Custom options format of operator %d is:  %d\n',i, subgraph.operators.operator(i).custom_options_format);  
+    subgraph.operators.operator(i).mutating_variable_inputs_pointer = GetPointer(VT_OPERATOR.VT_MUTATING_VARIABLE_INPUTS,subgraph.operators.operator(i).pointer, g_model, model_matrix_direction);
+    fprintf('Mutating variable inputs pointer of operator %d is:  0x%s\n',i, dec2hex(subgraph.operators.operator(i).mutating_variable_inputs_pointer));  
+    subgraph.operators.operator(i).intermediates_pointer = GetPointer(VT_OPERATOR.VT_INTERMEDIATES,subgraph.operators.operator(i).pointer, g_model, model_matrix_direction);
+    fprintf('Intermediates pointer of operator %d is:  0x%s\n',i, dec2hex(subgraph.operators.operator(i).intermediates_pointer));  
+end
+
