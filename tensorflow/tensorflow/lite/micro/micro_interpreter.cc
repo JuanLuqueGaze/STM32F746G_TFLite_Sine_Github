@@ -78,6 +78,26 @@ MicroInterpreter::MicroInterpreter(const Model* model,
                  error_reporter_),
       tensors_allocated_(false),
       context_helper_(error_reporter_, &allocator_) {
+
+
+
+  // Juan: Guarda el subgraph en una variable
+  /*
+char buffer[256];
+  // Print the entire tensor_arena content in hex
+sprintf(buffer, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)tensor_arena_size);
+PrintToUart(buffer);
+
+for (uint32_t i = 0; i < tensor_arena_size; ++i) {
+    sprintf(buffer, "%02X ", tensor_arena[i]);
+    PrintToUart(buffer);
+    // Print a newline every 16 bytes for readability
+    if ((i + 1) % 16 == 0) {
+        PrintToUart("\r\n");
+    }
+}
+PrintToUart("\r\n");*/
+
   const flatbuffers::Vector<flatbuffers::Offset<SubGraph>>* subgraphs =
       model->subgraphs();
   if (subgraphs->size() != 1) {
@@ -87,7 +107,7 @@ MicroInterpreter::MicroInterpreter(const Model* model,
     return;
   }
   subgraph_ = (*subgraphs)[0];
-
+  // Juan: Inicializa el context con el subgraph
   context_.impl_ = static_cast<void*>(&context_helper_);
   context_.ReportError = context_helper_.ReportOpError;
   context_.recommended_num_threads = 1;
@@ -161,6 +181,7 @@ void MicroInterpreter::CorrectTensorDataEndianness(T* data, int32_t size) {
 }
 
 TfLiteStatus MicroInterpreter::AllocateTensors() {
+  
   TF_LITE_ENSURE_OK(&context_, allocator_.AllocateNodeAndRegistrations(
                                    op_resolver_, &node_and_registrations_));
 
@@ -170,7 +191,7 @@ TfLiteStatus MicroInterpreter::AllocateTensors() {
   context_.GetScratchBuffer = nullptr;
 
   for (size_t i = 0; i < subgraph_->operators()->size(); ++i) {
-    context_helper_.SetNodeIndex(i);
+    context_helper_.SetNodeIndex(i); // Tells the context which operator is being initialized
     auto* node = &(node_and_registrations_[i].node);
     auto* registration = node_and_registrations_[i].registration;
     size_t init_data_size;

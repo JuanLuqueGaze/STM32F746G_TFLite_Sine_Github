@@ -1,7 +1,12 @@
 sizeof_SimpleMemoryAllocator = 20;
 alignof_SimpleMemoryAllocator = 4;
 soffset_t_size = 4; % bytes
-
+sizeof_TFLiteTensor = 768;
+alignof_TFLiteTensor = 4;
+sizeof_TfLiteAffineQuantization = 12;
+alignof_TfLiteAffineQuantization = 4;
+sizeof_TFLiteIntArray = 4;
+alignof_TFLiteIntArray = 4;
 
 VT_MODEL.VT_VERSION = 4;
 VT_MODEL.VT_OPERATOR_CODES = 6;

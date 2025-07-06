@@ -261,12 +261,14 @@ TfLiteStatus InitializeRuntimeTensor(
     SimpleMemoryAllocator* allocator, const tflite::Tensor& flatbuffer_tensor,
     const flatbuffers::Vector<flatbuffers::Offset<Buffer>>* buffers,
     ErrorReporter* error_reporter, TfLiteTensor* result) {
+      PrintToUart("InitializeRuntimeTensor\r\n");
   *result = {};
   // Make sure the serialized type is one we know how to deal with, and convert
   // it from a flatbuffer enum into a constant used by the kernel C API.
   TF_LITE_ENSURE_STATUS(ConvertTensorType(flatbuffer_tensor.type(),
                                           &result->type, error_reporter));
   // Make sure we remember if the serialized tensor is designated as a variable.
+  // Juan: Recibe el tensor numero i, de subgraph->tensors()->Get(i) y dentro del context guarda la información de si es variable
   result->is_variable = flatbuffer_tensor.is_variable();
 
   // We need to figure out where the actual contents of this tensor are stored
@@ -275,6 +277,8 @@ TfLiteStatus InitializeRuntimeTensor(
   // and if there is update the runtime structure to point to its location in
   // memory.
   // First see if there's any buffer information in the serialized tensor.
+
+  // Juan: obtiene el buffer asociado al tensor y mira dentro a ver si hay datos
   if (auto* buffer = (*buffers)[flatbuffer_tensor.buffer()]) {
     // If we've found a buffer, does it have any data?
     if (auto* array = buffer->data()) {
@@ -282,9 +286,10 @@ TfLiteStatus InitializeRuntimeTensor(
       if (array->size()) {
         // We've found a buffer with valid data, so update the runtime tensor
         // data structure to point to it.
+        // Juan: Pasa los datos al context
         result->data.data =
             const_cast<void*>(static_cast<const void*>(array->data()));
-        // We set the data from a serialized buffer, so record tha.
+        // We set the data from a serialized buffer, so record that.
         result->allocation_type = kTfLiteMmapRo;
       }
     }
@@ -294,6 +299,7 @@ TfLiteStatus InitializeRuntimeTensor(
     // error condition? It would be good to tighten up the specification to make
     // it less ambiguous.
   }
+  PrintToUart("After buffer\r\n");
 
   // TODO(petewarden): Some of these paths aren't getting enough testing
   // coverage, so we should figure out some tests that exercise them.
@@ -313,6 +319,7 @@ TfLiteStatus InitializeRuntimeTensor(
   // allocation so it is safe to drop the const qualifier. In the future, if we
   // really want to update the tensor shape, we can always pass in a new
   // TfLiteIntArray - especially we have to do so if the dimension is changed.
+  // Juan: Pasa la forma del tensor al context
   result->dims = const_cast<TfLiteIntArray*>(
       reinterpret_cast<const TfLiteIntArray*>(flatbuffer_tensor.shape()));
 
@@ -324,10 +331,12 @@ TfLiteStatus InitializeRuntimeTensor(
       (src_quantization->zero_point()->size() > 0)) {
     // Always populate the TfLiteTensor.params field, even if there are
     // per-channel quantization parameters.
+    // Juan: Pasa los parámetros de cuantización al context
     result->params.scale = src_quantization->scale()->Get(0);
     // Note that the zero_point field in the FlatBuffers schema is a 64-bit
     // integer, but the zero_point field in the TfLiteQuantizationParams struct
     // is a 32-bit integer.
+    // Juan: Pasa el punto cero al context
     result->params.zero_point =
         static_cast<int32_t>(src_quantization->zero_point()->Get(0));
 
@@ -382,8 +391,11 @@ TfLiteStatus InitializeRuntimeTensor(
 }  // namespace internal
 
 TfLiteStatus MicroAllocator::Init() {
-char debug_buffer[256];
 
+
+char debug_buffer[256];
+sprintf(debug_buffer, "Tail pointer: %p\r\n", (void*)memory_allocator_->GetTail());
+PrintToUart(debug_buffer);
 /*
 sprintf(debug_buffer, "Version: %d\r\n", model_->version());
 PrintToUart(debug_buffer);
@@ -405,7 +417,7 @@ PrintToUart(debug_buffer);
 
 sprintf(debug_buffer, "Pointer to metadata: %p\r\n", (void*)model_->metadata());
 PrintToUart(debug_buffer);
-*/
+*//*
 PrintToUart("OPERATOR CODES DATA");
 const auto* operator_codes = model_->operator_codes();
 sprintf(debug_buffer, "Operator codes count: %d\r\n", operator_codes ? operator_codes->size() : 0);
@@ -424,7 +436,7 @@ for (uint32_t i = 0; i < operator_codes->size(); ++i) {
 }
 
 
-  PrintToUart("I AM GETTING THE SUBGRAPH!!!!!\r\n");
+  PrintToUart("I AM GETTING THE SUBGRAPH!!!!!\r\n");*/
   auto* subgraphs = model_->subgraphs();
   if (subgraphs->size() != 1) {
     TF_LITE_REPORT_ERROR(error_reporter_,
@@ -435,20 +447,20 @@ for (uint32_t i = 0; i < operator_codes->size(); ++i) {
   subgraph_ = (*subgraphs)[0];
 
   context_->tensors_size = subgraph_->tensors()->size();
-
+/*
   sprintf(debug_buffer, "Subgraph info:\r\n");
   PrintToUart(debug_buffer);
   sprintf(debug_buffer, "Subgraph table address: %p\r\n", (void*)subgraph_);
   PrintToUart(debug_buffer);
   sprintf(debug_buffer, "Subgraph size: %d \r\n", subgraphs->size());
-  PrintToUart(debug_buffer);
+  PrintToUart(debug_buffer);*/
 
   const auto* tensors_ptr = subgraph_->tensors();
   const auto* inputs_ptr = subgraph_->inputs();
   const auto* outputs_ptr = subgraph_->outputs();
   const auto* operators_ptr = subgraph_->operators();
   const auto* name_ptr = subgraph_->name();
-
+/*
   sprintf(debug_buffer, "Pointer to tensors vector: %p\r\n", (void*)tensors_ptr);
   PrintToUart(debug_buffer);
   
@@ -465,7 +477,7 @@ for (uint32_t i = 0; i < operator_codes->size(); ++i) {
   PrintToUart(debug_buffer);
   
   sprintf(debug_buffer, "It has to allocate %ld tensors, of %d bytes with %d alignment\r\n", subgraph_->tensors()->size(),sizeof(TfLiteTensor) * context_->tensors_size,alignof(TfLiteTensor));
-  PrintToUart(debug_buffer);
+  PrintToUart(debug_buffer);*/
 
 /*
   PrintToUart("TENSORS INFO\r\n");
@@ -635,7 +647,7 @@ for (size_t i = 0; i < subgraph_->tensors()->size(); i++) {
     }
 */
 
-
+/*
   PrintToUart("SUBGRAPH INPUTS:\r\n");
   const auto* inputs_vec = subgraph_->inputs();
   if (inputs_vec) {
@@ -713,8 +725,8 @@ if (subgraph_) {
 } else {
     PrintToUart("No subgraph found.\r\n");
 }
-
-
+*/
+/*
 for (size_t op_idx = 0; op_idx < operators_vec->size(); ++op_idx) {
     const auto* op = operators_vec->Get(op_idx);
 
@@ -791,8 +803,29 @@ if (metadata_vec) {
 } else {
     PrintToUart("No metadata vector found.\r\n");
 }
+*/
 
+/*
+uint8_t* head = memory_allocator_->GetHead();
+uint8_t* tail = memory_allocator_->GetTail();
 
+size_t used_bytes = (head < tail) ? (tail - head) : 0;
+sprintf(debug_buffer, "Arena used bytes (tail - head): %u\r\n", (unsigned)used_bytes);
+PrintToUart(debug_buffer);
+
+if (used_bytes > 0) {
+    PrintToUart("Arena content (hex):\r\n");
+    // Print up to 256 bytes for safety
+    size_t print_bytes = used_bytes;
+    for (size_t i = 0; i < print_bytes; ++i) {
+        sprintf(debug_buffer, "%02X ", head[i]);
+        PrintToUart(debug_buffer);
+        if ((i+1) % 16 == 0) PrintToUart("\r\n");
+    }
+    PrintToUart("\r\n");
+}*/
+
+PrintToUart("Allocating tensors\r\n");
   context_->tensors =
       reinterpret_cast<TfLiteTensor*>(memory_allocator_->AllocateFromTail(
           sizeof(TfLiteTensor) * context_->tensors_size,
@@ -806,7 +839,7 @@ if (metadata_vec) {
         sizeof(TfLiteTensor) * context_->tensors_size);
     return kTfLiteError;
   }
-
+  // Juan: Aquí se inicializan los tensores del context, que son los que se usan en el runtime
   // Initialize runtime tensors in context_ using the flatbuffer.
   for (size_t i = 0; i < subgraph_->tensors()->size(); ++i) {
     sprintf(debug_buffer,"Bucle de inicialización, tensor %d\r\n",i);
@@ -841,6 +874,24 @@ MicroAllocator::MicroAllocator(TfLiteContext* context, const Model* model,
                                uint8_t* tensor_arena, size_t arena_size,
                                ErrorReporter* error_reporter)
     : model_(model), error_reporter_(error_reporter), context_(context) {
+
+
+// Print the entire tensor_arena content in hex
+char buffer[256];
+sprintf(buffer, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)arena_size);
+PrintToUart(buffer);
+
+for (uint32_t i = 0; i < arena_size; ++i) {
+    sprintf(buffer, "%02X ", tensor_arena[i]);
+    PrintToUart(buffer);
+    // Print a newline every 16 bytes for readability
+    if ((i + 1) % 16 == 0) {
+        PrintToUart("\r\n");
+    }
+}
+PrintToUart("\r\n");
+
+
   uint8_t* aligned_arena = AlignPointerUp(tensor_arena, kBufferAlignment);
   if (aligned_arena != tensor_arena) {
     TF_LITE_REPORT_ERROR(
@@ -871,24 +922,35 @@ MicroAllocator::MicroAllocator(TfLiteContext* context, const Model* model,
 TfLiteStatus MicroAllocator::AllocateNodeAndRegistrations(
     const OpResolver& op_resolver,
     NodeAndRegistration** node_and_registrations) {
+      // Juan: entra en esta función cuando entra a AllocateTensors
   if (!active_) {
     return kTfLiteError;
   }
+char debug_buffer[256];
 
+// Juan: AllocateNodeAndRegistrations se encarga de asignar memoria para los nodos y las registraciones, 200 bytes con alignment de 4
   auto* output = reinterpret_cast<NodeAndRegistration*>(
       memory_allocator_->AllocateFromTail(
           sizeof(NodeAndRegistration) * subgraph_->operators()->size(),
           alignof(NodeAndRegistration)));
+
+  for (size_t i = 0; i < subgraph_->operators()->size(); ++i) {
+    sprintf(debug_buffer, "NodeAndRegistration output pointer for op %lu: %p\r\n", (unsigned long)i, (void*)&output[i]);
+    PrintToUart(debug_buffer);
+  }
+
   if (output == nullptr) {
     TF_LITE_REPORT_ERROR(
         error_reporter_,
         "Failed to allocate memory for node_and_registrations.");
     return kTfLiteError;
   }
+
   TfLiteStatus status = kTfLiteOk;
   auto* opcodes = model_->operator_codes();
   MicroBuiltinDataAllocator builtin_data_allocator(memory_allocator_);
   for (size_t i = 0; i < subgraph_->operators()->size(); ++i) {
+    // Juan: obtiene el puntero al operador y el índice de operador
     const auto* op = subgraph_->operators()->Get(i);
     size_t index = op->opcode_index();
     if (index >= opcodes->size()) {
@@ -896,6 +958,7 @@ TfLiteStatus MicroAllocator::AllocateNodeAndRegistrations(
                            "Missing registration for opcode_index %d\n", index);
       return kTfLiteError;
     }
+    // Juan: obtiene el puntero al opcode
     auto* opcode = (*opcodes)[index];
     status = GetRegistrationFromOpCode(opcode, op_resolver, error_reporter_,
                                        &(output[i].registration));

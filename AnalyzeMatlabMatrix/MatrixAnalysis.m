@@ -1,7 +1,7 @@
 clear
 run('MatrixData.m');
 run('Globals.m')
-tensor_arena = 0x00000000;
+tensor_arena = 0x200008C0;
 tensor_arena_size= 4*1024;
 
 
@@ -326,4 +326,26 @@ for i=1:metadata.size
     metadata.metadata(i).buffer = GetField(VT_METADATA.VT_BUFFER,metadata.metadata(i).pointer, g_model, model_matrix_direction,4,0);
     fprintf('Metadata %d buffer is:  %d\n',i, metadata.metadata(i).buffer);  
     
+end
+
+%% Getting back to the workflow
+
+% Init function inside the micro_allocator
+
+tail_ = allocatefromtail(tail_,sizeof_TFLiteTensor,alignof_TFLiteTensor);
+ fprintf('tail_ pointer:  0x%s\n', dec2hex(tail_));  
+for i=1:subgraph.tensors.size
+    fprintf('Bucle de inicialización, tensor %d\r\n',i);
+    if subgraph.tensors.tensor(i).quantization.scale ~= 0
+%     InitializeRuntimeTensor(
+%         memory_allocator_, *subgraph_->tensors()->Get(i), model_->buffers(),
+%         error_reporter_, &context_->tensors[i]);
+    tail_=allocatefromtail(tail_,sizeof_TfLiteAffineQuantization,alignof_TfLiteAffineQuantization);
+    fprintf('tail_ pointer:  0x%s\n', dec2hex(tail_));
+    tail_=allocatefromtail(tail_,sizeof_TFLiteIntArray+sizeof_TFLiteIntArray*length(subgraph.tensors.tensor(i).quantization.scale_content),alignof_TFLiteIntArray);
+    fprintf('tail_ pointer:  0x%s\n', dec2hex(tail_)); 
+    tail_=allocatefromtail(tail_,sizeof_TFLiteIntArray+sizeof_TFLiteIntArray*length(subgraph.tensors.tensor(i).quantization.scale_content),alignof_TFLiteIntArray);
+    fprintf('tail_ pointer:  0x%s\n', dec2hex(tail_)); 
+
+    end
 end

@@ -22,6 +22,7 @@ TfLiteStatus GetRegistrationFromOpCode(
     ErrorReporter* error_reporter, const TfLiteRegistration** registration) {
   TfLiteStatus status = kTfLiteOk;
   *registration = nullptr;
+  // Juan: Obtiene el builtin code y la versión del opcode
   auto builtin_code = opcode->builtin_code();
   int version = opcode->version();
 
