@@ -274,7 +274,7 @@ TfLiteStatus InitializeRuntimeTensor(
       size_t arena_size =4096;
       uint8_t* tensor_arena = reinterpret_cast<uint8_t*>(allocator->GetHead());
 
-        // Print the entire tensor_arena content in hex
+/*        // Print the entire tensor_arena content in hex
       sprintf(buffer2, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)arena_size);
       PrintToUart(buffer2);
 
@@ -286,7 +286,7 @@ for (uint32_t i = 0; i < arena_size; ++i) {
         PrintToUart("\r\n");
     }
 }
-PrintToUart("\r\n");
+PrintToUart("\r\n");*/ 
 
   // Make sure the serialized type is one we know how to deal with, and convert
   // it from a flatbuffer enum into a constant used by the kernel C API.
@@ -345,7 +345,7 @@ PrintToUart("\r\n");
   // Figure out what the size in bytes of the buffer is and store it.
   size_t type_size;
 
-
+/*
 PrintToUart("Before bytes required for tensor\r\n");
 
 
@@ -362,14 +362,26 @@ for (uint32_t i = 0; i < arena_size; ++i) {
     }
 }
 PrintToUart("\r\n");
-
+*/
 
 
 
   TF_LITE_ENSURE_STATUS(BytesRequiredForTensor(
       flatbuffer_tensor, &result->bytes, &type_size, error_reporter));
 
-PrintToUart("After bytes required for tensor\r\n");
+
+
+  // TFLM doesn't allow reshaping the tensor which requires dynamic memory
+  // allocation so it is safe to drop the const qualifier. In the future, if we
+  // really want to update the tensor shape, we can always pass in a new
+  // TfLiteIntArray - especially we have to do so if the dimension is changed.
+  // Juan: Pasa la forma del tensor al context
+  result->dims = const_cast<TfLiteIntArray*>(
+      reinterpret_cast<const TfLiteIntArray*>(flatbuffer_tensor.shape()));
+
+
+/*
+PrintToUart("Before quantization\r\n");
 
 
 
@@ -385,17 +397,7 @@ for (uint32_t i = 0; i < arena_size; ++i) {
         PrintToUart("\r\n");
     }
 }
-PrintToUart("\r\n");
-
-
-
-  // TFLM doesn't allow reshaping the tensor which requires dynamic memory
-  // allocation so it is safe to drop the const qualifier. In the future, if we
-  // really want to update the tensor shape, we can always pass in a new
-  // TfLiteIntArray - especially we have to do so if the dimension is changed.
-  // Juan: Pasa la forma del tensor al context
-  result->dims = const_cast<TfLiteIntArray*>(
-      reinterpret_cast<const TfLiteIntArray*>(flatbuffer_tensor.shape()));
+PrintToUart("\r\n");*/
 
   // Copy the quantization information from the serialized data.
   const auto* src_quantization = flatbuffer_tensor.quantization();
@@ -462,13 +464,10 @@ PrintToUart("\r\n");
 
     result->quantization = {kTfLiteAffineQuantization, quantization};
   }
+/*
+PrintToUart("After quantization\r\n");
 
 
-
-        //uint8_t* tensor_arena_= 0x200008C0;
-      //size_t tensor_arena_size_=4096;
-       arena_size =4096;
-       tensor_arena = reinterpret_cast<uint8_t*>(allocator->GetHead());
 
         // Print the entire tensor_arena content in hex
       sprintf(buffer2, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)arena_size);
@@ -482,34 +481,14 @@ for (uint32_t i = 0; i < arena_size; ++i) {
         PrintToUart("\r\n");
     }
 }
-PrintToUart("\r\n");
+PrintToUart("\r\n");*/
+
 
 
 
   if (flatbuffer_tensor.name() != nullptr) {
     result->name = flatbuffer_tensor.name()->c_str();
   }
-
-
-        //uint8_t* tensor_arena_= 0x200008C0;
-      //size_t tensor_arena_size_=4096;
-       arena_size =4096;
-       tensor_arena = reinterpret_cast<uint8_t*>(allocator->GetHead());
-
-        // Print the entire tensor_arena content in hex
-      sprintf(buffer2, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)arena_size);
-      PrintToUart(buffer2);
-
-for (uint32_t i = 0; i < arena_size; ++i) {
-    sprintf(buffer2, "%02X ", tensor_arena[i]);
-    PrintToUart(buffer2);
-    // Print a newline every 16 bytes for readability
-    if ((i + 1) % 16 == 0) {
-        PrintToUart("\r\n");
-    }
-}
-PrintToUart("\r\n");
-
 
   return kTfLiteOk;
 }
@@ -1113,19 +1092,25 @@ char debug_buffer[256];
   }
 
   TfLiteStatus status = kTfLiteOk;
+  // Juan: obtiene el puntero para saber los datos de cada operador
   auto* opcodes = model_->operator_codes();
+  // Juan: lo declara como local sin más el allocator
   MicroBuiltinDataAllocator builtin_data_allocator(memory_allocator_);
+  
   for (size_t i = 0; i < subgraph_->operators()->size(); ++i) {
     // Juan: obtiene el puntero al operador y el índice de operador
     const auto* op = subgraph_->operators()->Get(i);
+    // Juan: indice dentro de los posibles, 0 quantization, 1 dense, 2 dequantize
     size_t index = op->opcode_index();
     if (index >= opcodes->size()) {
       TF_LITE_REPORT_ERROR(error_reporter_,
                            "Missing registration for opcode_index %d\n", index);
       return kTfLiteError;
     }
-    // Juan: obtiene el puntero al opcode
+    // Juan: obtiene la info de ese índice
     auto* opcode = (*opcodes)[index];
+    // Juan: Carga en el registration el builtin code, el version y el custom code
+    // LO CARGA EN MEMORIA
     status = GetRegistrationFromOpCode(opcode, op_resolver, error_reporter_,
                                        &(output[i].registration));
     if (status != kTfLiteOk) {
@@ -1134,6 +1119,7 @@ char debug_buffer[256];
                            EnumNameBuiltinOperator(opcode->builtin_code()));
       return status;
     }
+    // Juan: todo esto es debug
     const auto* registration = output[i].registration;
     if (registration == nullptr) {
       TF_LITE_REPORT_ERROR(error_reporter_, "Skipping op for opcode_index %d\n",
@@ -1151,7 +1137,7 @@ char debug_buffer[256];
           EnumNameBuiltinOperator(op_type));
       return kTfLiteError;
     }
-
+    // Juan: en caso de ser custom se asigna (no nos va a pasar)
     const char* custom_data = nullptr;
     size_t custom_data_size = 0;
     unsigned char* builtin_data = nullptr;

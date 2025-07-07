@@ -189,7 +189,7 @@ TfLiteStatus MicroInterpreter::AllocateTensors() {
   context_.AllocatePersistentBuffer = context_helper_.AllocatePersistentBuffer;
   context_.RequestScratchBufferInArena = nullptr;
   context_.GetScratchBuffer = nullptr;
-
+// Juan: Iterando en los operators (que son 5)
   for (size_t i = 0; i < subgraph_->operators()->size(); ++i) {
     context_helper_.SetNodeIndex(i); // Tells the context which operator is being initialized
     auto* node = &(node_and_registrations_[i].node);
