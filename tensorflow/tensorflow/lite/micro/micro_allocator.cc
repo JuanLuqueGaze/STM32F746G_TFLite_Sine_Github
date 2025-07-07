@@ -261,15 +261,44 @@ TfLiteStatus InitializeRuntimeTensor(
     SimpleMemoryAllocator* allocator, const tflite::Tensor& flatbuffer_tensor,
     const flatbuffers::Vector<flatbuffers::Offset<Buffer>>* buffers,
     ErrorReporter* error_reporter, TfLiteTensor* result) {
+      
+      /*    TfLiteStatus status = internal::InitializeRuntimeTensor(
+        memory_allocator_, *subgraph_->tensors()->Get(i), model_->buffers(),
+        error_reporter_, &context_->tensors[i]);*/
+      
+      char buffer2[256];
       PrintToUart("InitializeRuntimeTensor\r\n");
   *result = {};
+
+        //size_t tensor_arena_size_=4096;
+      size_t arena_size =4096;
+      uint8_t* tensor_arena = reinterpret_cast<uint8_t*>(allocator->GetHead());
+
+        // Print the entire tensor_arena content in hex
+      sprintf(buffer2, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)arena_size);
+      PrintToUart(buffer2);
+
+for (uint32_t i = 0; i < arena_size; ++i) {
+    sprintf(buffer2, "%02X ", tensor_arena[i]);
+    PrintToUart(buffer2);
+    // Print a newline every 16 bytes for readability
+    if ((i + 1) % 16 == 0) {
+        PrintToUart("\r\n");
+    }
+}
+PrintToUart("\r\n");
+
   // Make sure the serialized type is one we know how to deal with, and convert
   // it from a flatbuffer enum into a constant used by the kernel C API.
+
+  // Guarda el type en memoria, ya que el context está en el tensor arena
   TF_LITE_ENSURE_STATUS(ConvertTensorType(flatbuffer_tensor.type(),
                                           &result->type, error_reporter));
   // Make sure we remember if the serialized tensor is designated as a variable.
   // Juan: Recibe el tensor numero i, de subgraph->tensors()->Get(i) y dentro del context guarda la información de si es variable
+
   result->is_variable = flatbuffer_tensor.is_variable();
+
 
   // We need to figure out where the actual contents of this tensor are stored
   // in memory. We'll check to see if there's a serialized buffer (pretty much
@@ -290,7 +319,9 @@ TfLiteStatus InitializeRuntimeTensor(
         result->data.data =
             const_cast<void*>(static_cast<const void*>(array->data()));
         // We set the data from a serialized buffer, so record that.
-        result->allocation_type = kTfLiteMmapRo;
+        result->allocation_type = kTfLiteMmapRo; 
+         PrintToUart("Inside of ifx3\r\n");
+
       }
     }
     // TODO(petewarden): It's not clear in what circumstances we could have a
@@ -300,6 +331,7 @@ TfLiteStatus InitializeRuntimeTensor(
     // it less ambiguous.
   }
   PrintToUart("After buffer\r\n");
+
 
   // TODO(petewarden): Some of these paths aren't getting enough testing
   // coverage, so we should figure out some tests that exercise them.
@@ -312,8 +344,50 @@ TfLiteStatus InitializeRuntimeTensor(
 
   // Figure out what the size in bytes of the buffer is and store it.
   size_t type_size;
+
+
+PrintToUart("Before bytes required for tensor\r\n");
+
+
+        // Print the entire tensor_arena content in hex
+      sprintf(buffer2, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)arena_size);
+      PrintToUart(buffer2);
+
+for (uint32_t i = 0; i < arena_size; ++i) {
+    sprintf(buffer2, "%02X ", tensor_arena[i]);
+    PrintToUart(buffer2);
+    // Print a newline every 16 bytes for readability
+    if ((i + 1) % 16 == 0) {
+        PrintToUart("\r\n");
+    }
+}
+PrintToUart("\r\n");
+
+
+
+
   TF_LITE_ENSURE_STATUS(BytesRequiredForTensor(
       flatbuffer_tensor, &result->bytes, &type_size, error_reporter));
+
+PrintToUart("After bytes required for tensor\r\n");
+
+
+
+        // Print the entire tensor_arena content in hex
+      sprintf(buffer2, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)arena_size);
+      PrintToUart(buffer2);
+
+for (uint32_t i = 0; i < arena_size; ++i) {
+    sprintf(buffer2, "%02X ", tensor_arena[i]);
+    PrintToUart(buffer2);
+    // Print a newline every 16 bytes for readability
+    if ((i + 1) % 16 == 0) {
+        PrintToUart("\r\n");
+    }
+}
+PrintToUart("\r\n");
+
+
 
   // TFLM doesn't allow reshaping the tensor which requires dynamic memory
   // allocation so it is safe to drop the const qualifier. In the future, if we
@@ -346,11 +420,16 @@ TfLiteStatus InitializeRuntimeTensor(
         reinterpret_cast<TfLiteAffineQuantization*>(
             allocator->AllocateFromTail(sizeof(TfLiteAffineQuantization),
                                         alignof(TfLiteAffineQuantization)));
+
+
     if (quantization == nullptr) {
       TF_LITE_REPORT_ERROR(error_reporter,
                            "Unable to allocate TfLiteAffineQuantization.\n");
       return kTfLiteError;
     }
+
+
+
     quantization->zero_point =
         reinterpret_cast<TfLiteIntArray*>(allocator->AllocateFromTail(
             TfLiteIntArrayGetSizeInBytes(channels), alignof(TfLiteIntArray)));
@@ -383,9 +462,55 @@ TfLiteStatus InitializeRuntimeTensor(
 
     result->quantization = {kTfLiteAffineQuantization, quantization};
   }
+
+
+
+        //uint8_t* tensor_arena_= 0x200008C0;
+      //size_t tensor_arena_size_=4096;
+       arena_size =4096;
+       tensor_arena = reinterpret_cast<uint8_t*>(allocator->GetHead());
+
+        // Print the entire tensor_arena content in hex
+      sprintf(buffer2, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)arena_size);
+      PrintToUart(buffer2);
+
+for (uint32_t i = 0; i < arena_size; ++i) {
+    sprintf(buffer2, "%02X ", tensor_arena[i]);
+    PrintToUart(buffer2);
+    // Print a newline every 16 bytes for readability
+    if ((i + 1) % 16 == 0) {
+        PrintToUart("\r\n");
+    }
+}
+PrintToUart("\r\n");
+
+
+
   if (flatbuffer_tensor.name() != nullptr) {
     result->name = flatbuffer_tensor.name()->c_str();
   }
+
+
+        //uint8_t* tensor_arena_= 0x200008C0;
+      //size_t tensor_arena_size_=4096;
+       arena_size =4096;
+       tensor_arena = reinterpret_cast<uint8_t*>(allocator->GetHead());
+
+        // Print the entire tensor_arena content in hex
+      sprintf(buffer2, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)arena_size);
+      PrintToUart(buffer2);
+
+for (uint32_t i = 0; i < arena_size; ++i) {
+    sprintf(buffer2, "%02X ", tensor_arena[i]);
+    PrintToUart(buffer2);
+    // Print a newline every 16 bytes for readability
+    if ((i + 1) % 16 == 0) {
+        PrintToUart("\r\n");
+    }
+}
+PrintToUart("\r\n");
+
+
   return kTfLiteOk;
 }
 }  // namespace internal
@@ -825,6 +950,7 @@ if (used_bytes > 0) {
     PrintToUart("\r\n");
 }*/
 
+// El context está dentro del tensor arena, todo lo que se modifique del context se hace dentro del tensor arena
 PrintToUart("Allocating tensors\r\n");
   context_->tensors =
       reinterpret_cast<TfLiteTensor*>(memory_allocator_->AllocateFromTail(
@@ -839,6 +965,26 @@ PrintToUart("Allocating tensors\r\n");
         sizeof(TfLiteTensor) * context_->tensors_size);
     return kTfLiteError;
   }
+
+  char buffer2[256];
+//uint8_t* tensor_arena_= 0x200008C0;
+//size_t tensor_arena_size_=4096;
+size_t arena_size =4096;
+uint8_t* tensor_arena = reinterpret_cast<uint8_t*>(memory_allocator_->GetHead());
+
+  // Print the entire tensor_arena content in hex
+sprintf(buffer2, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)arena_size);
+PrintToUart(buffer2);
+
+for (uint32_t i = 0; i < arena_size; ++i) {
+    sprintf(buffer2, "%02X ", tensor_arena[i]);
+    PrintToUart(buffer2);
+    // Print a newline every 16 bytes for readability
+    if ((i + 1) % 16 == 0) {
+        PrintToUart("\r\n");
+    }
+}
+PrintToUart("\r\n");
   // Juan: Aquí se inicializan los tensores del context, que son los que se usan en el runtime
   // Initialize runtime tensors in context_ using the flatbuffer.
   for (size_t i = 0; i < subgraph_->tensors()->size(); ++i) {
@@ -847,12 +993,31 @@ PrintToUart("Allocating tensors\r\n");
     TfLiteStatus status = internal::InitializeRuntimeTensor(
         memory_allocator_, *subgraph_->tensors()->Get(i), model_->buffers(),
         error_reporter_, &context_->tensors[i]);
+
+    sprintf(debug_buffer,"Head: %p\r\n",reinterpret_cast<uint8_t*>(memory_allocator_->GetHead()));
+    PrintToUart(debug_buffer);    
+    sprintf(debug_buffer,"Tail: %p\r\n",reinterpret_cast<uint8_t*>(memory_allocator_->GetTail()));
+    PrintToUart(debug_buffer);
     if (status != kTfLiteOk) {
       TF_LITE_REPORT_ERROR(error_reporter_, "Failed to initialize tensor %d",
                            i);
       return kTfLiteError;
     }
   }
+
+    // Print the entire tensor_arena content in hex
+sprintf(buffer2, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)arena_size);
+PrintToUart(buffer2);
+
+for (uint32_t i = 0; i < arena_size; ++i) {
+    sprintf(buffer2, "%02X ", tensor_arena[i]);
+    PrintToUart(buffer2);
+    // Print a newline every 16 bytes for readability
+    if ((i + 1) % 16 == 0) {
+        PrintToUart("\r\n");
+    }
+}
+PrintToUart("\r\n");
 
   return kTfLiteOk;
 }
@@ -878,6 +1043,7 @@ MicroAllocator::MicroAllocator(TfLiteContext* context, const Model* model,
 
 // Print the entire tensor_arena content in hex
 char buffer[256];
+/*
 sprintf(buffer, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)arena_size);
 PrintToUart(buffer);
 
@@ -889,7 +1055,7 @@ for (uint32_t i = 0; i < arena_size; ++i) {
         PrintToUart("\r\n");
     }
 }
-PrintToUart("\r\n");
+PrintToUart("\r\n");*/
 
 
   uint8_t* aligned_arena = AlignPointerUp(tensor_arena, kBufferAlignment);

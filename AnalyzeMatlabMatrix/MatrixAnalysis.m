@@ -8,7 +8,7 @@ tensor_arena_size= 4*1024;
 tensor_head = tensor_arena;
 tensor_tail = tensor_head + tensor_arena_size;
 
-model_matrix_direction = 0x0804BF2C;
+model_matrix_direction = 0x0804B1B4;
 model_direction = model_matrix_direction + getnumber(g_model(1),g_model(2));
 offsetmatrixmodel = getnumber(g_model(1),g_model(2));
 

@@ -71,7 +71,7 @@ for (uint32_t i = 0; i < buffer_size; ++i) {
 }
 PrintToUart("\r\n");*/
           
-
+/*
 
   sprintf(buffer3, "Allocation size: %d; Allocation alignment: %d\r\n", sizeof(SimpleMemoryAllocator), alignof(SimpleMemoryAllocator));
   PrintToUart(buffer3);
@@ -91,7 +91,7 @@ for (uint32_t i = 0; i < buffer_size; ++i) {
         PrintToUart("\r\n");
     }
 }
-PrintToUart("\r\n");
+PrintToUart("\r\n");*/
 
 // Juan: aquí es donde se asigna contenido al tensor arena
 // Si miramos en el simple memory allocator, vemos que en el private tiene estas cosas:
@@ -104,11 +104,11 @@ PrintToUart("\r\n");
   uint8_t* tail_;*/
 
   // Si miro las ultimas líneas del tensor arena, coinciden el error_reporter, el buffer_head_, el buffer_tail_, el head_ y el tail_ con los valores que tengo en el buffer
-
+/*
 sprintf(buffer2, "error_reporter_ pointer: %p\r\n", (void*)error_reporter);
-PrintToUart(buffer2);
+PrintToUart(buffer2);*/
   *in_place_allocator = tmp;
-
+/*
   sprintf(buffer2, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)buffer_size);
 PrintToUart(buffer2);
 
@@ -120,7 +120,7 @@ for (uint32_t i = 0; i < buffer_size; ++i) {
         PrintToUart("\r\n");
     }
 }
-PrintToUart("\r\n");
+PrintToUart("\r\n");*/
 
   return in_place_allocator;
 }

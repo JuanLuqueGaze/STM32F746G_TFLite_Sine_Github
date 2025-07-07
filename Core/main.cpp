@@ -170,6 +170,7 @@ int main(void)
   PrintToUart(buffer);
 
   char byte_buffer[128];
+  /*
 sprintf(byte_buffer, "First 30 bytes of tensor_arena:\r\n");
 PrintToUart(byte_buffer);
 
@@ -181,7 +182,7 @@ for (int i = 0; i < 30; ++i) {
         PrintToUart("\r\n");
     }
 }
-PrintToUart("\r\n");
+PrintToUart("\r\n");*/
 
 
 if(model->version() != TFLITE_SCHEMA_VERSION)
@@ -198,6 +199,7 @@ if(model->version() != TFLITE_SCHEMA_VERSION)
 
 
  // Print the entire tensor_arena content in hex
+ /*
 sprintf(buffer, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)kTensorArenaSize);
 PrintToUart(buffer);
 
@@ -209,7 +211,7 @@ for (uint32_t i = 0; i < kTensorArenaSize; ++i) {
         PrintToUart("\r\n");
     }
 }
-PrintToUart("\r\n");
+PrintToUart("\r\n");*/
  // Build an interpreter to run the model with.
  static tflite::MicroInterpreter static_interpreter(model, resolver, tensor_arena, kTensorArenaSize, error_reporter);
  interpreter = &static_interpreter;
@@ -217,7 +219,7 @@ PrintToUart("\r\n");
  // Allocate memory from the tensor_arena for the model's tensors.
  // Juan: Vamos a estudiar el AllocateTensors() para ver qué hace
 
-
+/*
  // Print the entire tensor_arena content in hex
 sprintf(buffer, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)kTensorArenaSize);
 PrintToUart(buffer);
@@ -245,7 +247,7 @@ for (uint32_t i = 0; i < kTensorArenaSize; ++i) {
         PrintToUart("\r\n");
     }
 }
-PrintToUart("\r\n");
+PrintToUart("\r\n");*/
 
 
  TfLiteStatus allocate_status = interpreter->AllocateTensors();
