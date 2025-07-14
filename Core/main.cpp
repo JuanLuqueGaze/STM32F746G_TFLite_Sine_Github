@@ -117,7 +117,7 @@ void handle_output(tflite::ErrorReporter* error_reporter, float x_value, float y
   */
 int main(void)
 {
-
+  HAL_Init();
   /* USER CODE BEGIN 1 */
   BSP_LED_Init(LED_GREEN);
 
@@ -264,6 +264,7 @@ PrintToUart("\r\n");*/
  float unitValuePerDevision = INPUT_RANGE / static_cast<float>(INFERENCE_PER_CYCLE);
 
 // Print the entire tensor_arena content in hex
+/*
 sprintf(buffer, "Full tensor_arena content (%lu bytes):\r\n", (unsigned long)kTensorArenaSize);
 PrintToUart(buffer);
 
@@ -275,7 +276,7 @@ for (uint32_t i = 0; i < kTensorArenaSize; ++i) {
         PrintToUart("\r\n");
     }
 }
-PrintToUart("\r\n");
+PrintToUart("\r\n");*/
 
   while (1)
   {
@@ -287,8 +288,16 @@ PrintToUart("\r\n");
             // Place our calculated x value in the model's input tensor
             input->data.f[0] = x_val;
   
-            // Run inference, and report any error
+            uint32_t start = HAL_GetTick();
+            
+            sprintf(buffer, "Start time: %lu ms\r\n", (unsigned long)start);
+            PrintToUart(buffer);
             TfLiteStatus invoke_status = interpreter->Invoke();
+            uint32_t end = HAL_GetTick();
+            uint32_t elapsed = end - start;
+            sprintf(buffer, "Inference time: %lu ms\r\n", (unsigned long)elapsed);
+            PrintToUart(buffer);
+
             if (invoke_status != kTfLiteOk)
             {
                 TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed on x_val: %f\n", static_cast<float>(x_val));
