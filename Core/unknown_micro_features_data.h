@@ -1,0 +1,8 @@
+#ifndef TENSORFLOW_LITE_MICRO_EXAMPLES_MICRO_SPEECH_MICRO_FEATURES_UNKNOWN_MICRO_FEATURES_DATA_H_
+#define TENSORFLOW_LITE_MICRO_EXAMPLES_MICRO_SPEECH_MICRO_FEATURES_UNKNOWN_MICRO_FEATURES_DATA_H_
+
+extern const int g_unknown_width;
+extern const int g_unknown_height;
+extern const unsigned char g_unknown_data[];
+
+#endif 
